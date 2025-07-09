@@ -1,5 +1,5 @@
-
 import { useState, useEffect, createContext, useContext, ReactNode } from 'react';
+import { useAccount, useDisconnect } from 'wagmi';
 import { useToast } from '@/hooks/use-toast';
 
 interface WalletProfile {
@@ -96,10 +96,10 @@ export const useWallet = () => {
 };
 
 export const WalletProvider = ({ children }: { children: ReactNode }) => {
-  const [isConnected, setIsConnected] = useState(false);
-  const [walletAddress, setWalletAddress] = useState<string | null>(null);
   const [profile, setProfile] = useState<WalletProfile | null>(null);
   const { toast } = useToast();
+  const { address, isConnected } = useAccount();
+  const { disconnect: wagmiDisconnect } = useDisconnect();
 
   const createNewProfile = (address: string): WalletProfile => {
     return {
@@ -172,9 +172,7 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
       localStorage.setItem(profileKey, JSON.stringify(userProfile));
       localStorage.setItem('lastConnectedWallet', address);
 
-      setWalletAddress(address);
       setProfile(userProfile);
-      setIsConnected(true);
 
       toast({
         title: "Wallet Connected",
@@ -191,8 +189,7 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const disconnect = () => {
-    setIsConnected(false);
-    setWalletAddress(null);
+    wagmiDisconnect();
     setProfile(null);
     localStorage.removeItem('lastConnectedWallet');
     
@@ -208,27 +205,28 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const updateProfile = (updates: Partial<WalletProfile>) => {
-    if (!profile || !walletAddress) return;
+    if (!profile || !address) return;
 
     const updatedProfile = { ...profile, ...updates };
     setProfile(updatedProfile);
     
-    const profileKey = `baseDemoProfile_${walletAddress}`;
+    const profileKey = `baseDemoProfile_${address}`;
     localStorage.setItem(profileKey, JSON.stringify(updatedProfile));
   };
 
-  // Auto-connect on app start
+  // Watch for account changes from RainbowKit
   useEffect(() => {
-    const lastWallet = localStorage.getItem('lastConnectedWallet');
-    if (lastWallet) {
-      connect(lastWallet);
+    if (isConnected && address) {
+      connect(address);
+    } else if (!isConnected) {
+      setProfile(null);
     }
-  }, []);
+  }, [isConnected, address]);
 
   return (
     <WalletContext.Provider value={{
       isConnected,
-      walletAddress,
+      walletAddress: address || null,
       profile,
       connect,
       disconnect,

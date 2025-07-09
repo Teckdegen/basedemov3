@@ -2,9 +2,9 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X } from 'lucide-react';
+import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useWallet } from '@/hooks/useWallet';
 
 interface WalletModalProps {
   isOpen: boolean;
@@ -12,29 +12,6 @@ interface WalletModalProps {
 }
 
 export const WalletModal = ({ isOpen, onClose }: WalletModalProps) => {
-  const [isConnecting, setIsConnecting] = useState(false);
-  const { connect } = useWallet();
-
-  // Simulate wallet connection (Base chain)
-  const handleConnect = async (walletType: string) => {
-    setIsConnecting(true);
-    
-    try {
-      // Simulate connection delay
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // Generate a mock wallet address for demo
-      const mockAddress = '0x' + Math.random().toString(16).substr(2, 40);
-      
-      connect(mockAddress);
-      onClose();
-    } catch (error) {
-      console.error('Connection failed:', error);
-    } finally {
-      setIsConnecting(false);
-    }
-  };
-
   return (
     <AnimatePresence>
       {isOpen && (
@@ -74,44 +51,109 @@ export const WalletModal = ({ isOpen, onClose }: WalletModalProps) => {
               </CardHeader>
               
               <CardContent className="space-y-4">
-                <Button
-                  onClick={() => handleConnect('metamask')}
-                  disabled={isConnecting}
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-semibold transition-all duration-200 hover:scale-105 active:scale-95"
-                  style={{ minHeight: '48px' }}
-                >
-                  {isConnecting ? (
-                    <div className="flex items-center space-x-2">
-                      <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
-                      <span>Connecting...</span>
-                    </div>
-                  ) : (
-                    'Connect MetaMask'
-                  )}
-                </Button>
+                <div className="flex justify-center">
+                  <ConnectButton.Custom>
+                    {({
+                      account,
+                      chain,
+                      openAccountModal,
+                      openChainModal,
+                      openConnectModal,
+                      authenticationStatus,
+                      mounted,
+                    }) => {
+                      const ready = mounted && authenticationStatus !== 'loading';
+                      const connected =
+                        ready &&
+                        account &&
+                        chain &&
+                        (!authenticationStatus ||
+                          authenticationStatus === 'authenticated');
 
-                <Button
-                  onClick={() => handleConnect('walletconnect')}
-                  disabled={isConnecting}
-                  variant="outline"
-                  className="w-full border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white py-3 rounded-xl font-semibold transition-all duration-200 hover:scale-105 active:scale-95"
-                  style={{ minHeight: '48px' }}
-                >
-                  WalletConnect
-                </Button>
+                      return (
+                        <div
+                          {...(!ready && {
+                            'aria-hidden': true,
+                            'style': {
+                              opacity: 0,
+                              pointerEvents: 'none',
+                              userSelect: 'none',
+                            },
+                          })}
+                        >
+                          {(() => {
+                            if (!connected) {
+                              return (
+                                <Button
+                                  onClick={openConnectModal}
+                                  className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-semibold transition-all duration-200 hover:scale-105 active:scale-95"
+                                  style={{ minHeight: '48px' }}
+                                >
+                                  Connect Wallet
+                                </Button>
+                              );
+                            }
 
-                <Button
-                  onClick={() => handleConnect('coinbase')}
-                  disabled={isConnecting}
-                  variant="outline"
-                  className="w-full border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white py-3 rounded-xl font-semibold transition-all duration-200 hover:scale-105 active:scale-95"
-                  style={{ minHeight: '48px' }}
-                >
-                  Coinbase Wallet
-                </Button>
+                            if (chain.unsupported) {
+                              return (
+                                <Button
+                                  onClick={openChainModal}
+                                  variant="destructive"
+                                  className="w-full py-3 rounded-xl font-semibold"
+                                  style={{ minHeight: '48px' }}
+                                >
+                                  Wrong network
+                                </Button>
+                              );
+                            }
+
+                            return (
+                              <div className="flex gap-3">
+                                <Button
+                                  onClick={openChainModal}
+                                  variant="outline"
+                                  className="flex items-center gap-2"
+                                >
+                                  {chain.hasIcon && (
+                                    <div
+                                      style={{
+                                        background: chain.iconBackground,
+                                        width: 12,
+                                        height: 12,
+                                        borderRadius: 999,
+                                        overflow: 'hidden',
+                                        marginRight: 4,
+                                      }}
+                                    >
+                                      {chain.iconUrl && (
+                                        <img
+                                          alt={chain.name ?? 'Chain icon'}
+                                          src={chain.iconUrl}
+                                          style={{ width: 12, height: 12 }}
+                                        />
+                                      )}
+                                    </div>
+                                  )}
+                                  {chain.name}
+                                </Button>
+
+                                <Button onClick={openAccountModal} variant="outline">
+                                  {account.displayName}
+                                  {account.displayBalance
+                                    ? ` (${account.displayBalance})`
+                                    : ''}
+                                </Button>
+                              </div>
+                            );
+                          })()}
+                        </div>
+                      );
+                    }}
+                  </ConnectButton.Custom>
+                </div>
 
                 <div className="text-center text-xs text-gray-500 mt-4">
-                  This is a demo app. No real wallet connection is made.
+                  This is a demo app using RainbowKit for wallet connection.
                 </div>
               </CardContent>
             </Card>
