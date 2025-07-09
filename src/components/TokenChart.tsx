@@ -195,7 +195,6 @@ export const TokenChart = ({ price, symbol, priceChange24h = 0 }: TokenChartProp
         position: 'right',
         grid: {
           color: 'rgba(107, 114, 128, 0.1)',
-          drawBorder: false,
         },
         ticks: {
           color: '#6B7280',

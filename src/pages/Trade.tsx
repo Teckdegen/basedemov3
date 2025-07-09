@@ -131,6 +131,8 @@ const Trade = () => {
     const amount = parseFloat(ethAmount);
     const total = amount + fee;
 
+    console.log('Buy transaction:', { amount, fee, total, balance: profile.fakeUSDCBalance });
+
     if (total > profile.fakeUSDCBalance) {
       toast({
         title: "Insufficient Balance",
@@ -159,12 +161,14 @@ const Trade = () => {
       const tokensAfterSlippage = tokens * (1 - slippage / 100);
       const currentPrice = parseFloat(tokenData.priceUsd);
 
+      console.log('Token calculation:', { tokens, tokensAfterSlippage, currentPrice });
+
       // Update portfolio
       const existingToken = profile.portfolio.find(t => t.contractAddress === contractAddress);
       let updatedPortfolio;
 
       if (existingToken) {
-        // Update existing token
+        // Update existing token - calculate weighted average buy price
         const totalAmount = existingToken.amount + tokensAfterSlippage;
         const newBuyPrice = ((existingToken.amount * existingToken.buyPrice) + (tokensAfterSlippage * currentPrice)) / totalAmount;
         
@@ -186,6 +190,15 @@ const Trade = () => {
         }];
       }
 
+      // Calculate new balance correctly
+      const newBalance = profile.fakeUSDCBalance - total;
+      
+      console.log('Balance update:', { 
+        oldBalance: profile.fakeUSDCBalance, 
+        newBalance, 
+        spent: total 
+      });
+
       // Update trade history
       const newTrade = {
         type: 'BUY' as const,
@@ -199,11 +212,11 @@ const Trade = () => {
       };
 
       // Update portfolio value history
-      const newTotalValue = (profile.fakeUSDCBalance - total) + 
-        updatedPortfolio.reduce((sum, t) => sum + (t.amount * t.lastPrice), 0);
+      const portfolioValue = updatedPortfolio.reduce((sum, t) => sum + (t.amount * t.lastPrice), 0);
+      const newTotalValue = newBalance + portfolioValue;
 
       updateProfile({
-        fakeUSDCBalance: profile.fakeUSDCBalance - total,
+        fakeUSDCBalance: newBalance,
         portfolio: updatedPortfolio,
         tradeHistory: [...profile.tradeHistory, newTrade],
         portfolioValueHistory: [
@@ -222,6 +235,7 @@ const Trade = () => {
       setTokenAmount('');
 
     } catch (error) {
+      console.error('Buy error:', error);
       toast({
         title: "Trade Failed",
         description: "Something went wrong. Please try again.",
@@ -259,6 +273,14 @@ const Trade = () => {
 
       const profit = (currentPrice - existingToken.buyPrice) * amount;
 
+      console.log('Sell transaction:', { 
+        amount, 
+        ethReturn, 
+        ethAfterSlippage, 
+        finalAmount, 
+        currentBalance: profile.fakeUSDCBalance 
+      });
+
       // Update portfolio
       let updatedPortfolio;
       if (existingToken.amount === amount) {
@@ -272,6 +294,15 @@ const Trade = () => {
             : t
         );
       }
+
+      // Calculate new balance correctly
+      const newBalance = profile.fakeUSDCBalance + finalAmount;
+
+      console.log('Sell balance update:', { 
+        oldBalance: profile.fakeUSDCBalance, 
+        newBalance, 
+        received: finalAmount 
+      });
 
       // Update trade history
       const newTrade = {
@@ -287,11 +318,11 @@ const Trade = () => {
       };
 
       // Update portfolio value history
-      const newTotalValue = (profile.fakeUSDCBalance + finalAmount) + 
-        updatedPortfolio.reduce((sum, t) => sum + (t.amount * t.lastPrice), 0);
+      const portfolioValue = updatedPortfolio.reduce((sum, t) => sum + (t.amount * t.lastPrice), 0);
+      const newTotalValue = newBalance + portfolioValue;
 
       updateProfile({
-        fakeUSDCBalance: profile.fakeUSDCBalance + finalAmount,
+        fakeUSDCBalance: newBalance,
         portfolio: updatedPortfolio,
         tradeHistory: [...profile.tradeHistory, newTrade],
         portfolioValueHistory: [
@@ -309,6 +340,7 @@ const Trade = () => {
       setTokenAmount('');
 
     } catch (error) {
+      console.error('Sell error:', error);
       toast({
         title: "Trade Failed",
         description: "Something went wrong. Please try again.",
@@ -400,7 +432,7 @@ const Trade = () => {
   return (
     <div className="min-h-screen bg-gray-50 pt-32 pb-20 md:pb-6">
       <div className="max-w-6xl mx-auto px-4 space-y-6">
-        {/* Header with Search */}
+        {/* Header with Search and Quick Trade */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -420,6 +452,26 @@ const Trade = () => {
           </div>
 
           <div className="flex items-center space-x-2">
+            {/* Quick Trade Buttons */}
+            <Button
+              onClick={() => setActiveTab('buy')}
+              variant={activeTab === 'buy' ? 'default' : 'outline'}
+              size="sm"
+              className={`min-w-[60px] ${activeTab === 'buy' ? 'bg-green-600 hover:bg-green-700 text-white' : ''}`}
+            >
+              <TrendingUp className="w-4 h-4 mr-1" />
+              Buy
+            </Button>
+            <Button
+              onClick={() => setActiveTab('sell')}
+              variant={activeTab === 'sell' ? 'default' : 'outline'}
+              size="sm"
+              className={`min-w-[60px] ${activeTab === 'sell' ? 'bg-red-500 hover:bg-red-600 text-white' : ''}`}
+              disabled={!existingToken}
+            >
+              <TrendingUp className="w-4 h-4 mr-1 rotate-180" />
+              Sell
+            </Button>
             <Button
               onClick={addToWatchlist}
               variant="outline"
@@ -443,6 +495,32 @@ const Trade = () => {
             >
               <ExternalLink className="w-4 h-4" />
             </Button>
+          </div>
+        </motion.div>
+
+        {/* Balance Display */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.05 }}
+          className="bg-blue-50 border border-blue-200 rounded-lg p-4"
+        >
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-blue-600">Your Balance</p>
+              <p className="text-2xl font-bold text-blue-800">{profile.fakeUSDCBalance.toFixed(4)} ETH</p>
+            </div>
+            {existingToken && (
+              <div className="text-right">
+                <p className="text-sm text-blue-600">Holdings</p>
+                <p className="text-lg font-semibold text-blue-800">
+                  {existingToken.amount.toLocaleString()} {tokenData.baseToken.symbol}
+                </p>
+                <p className="text-sm text-gray-600">
+                  ${(existingToken.amount * parseFloat(tokenData.priceUsd)).toFixed(2)}
+                </p>
+              </div>
+            )}
           </div>
         </motion.div>
 
@@ -555,14 +633,14 @@ const Trade = () => {
                   <Button
                     onClick={() => setActiveTab('buy')}
                     variant={activeTab === 'buy' ? 'default' : 'ghost'}
-                    className={`flex-1 ${activeTab === 'buy' ? 'bg-blue-600 text-white' : ''}`}
+                    className={`flex-1 ${activeTab === 'buy' ? 'bg-green-600 text-white hover:bg-green-700' : ''}`}
                   >
                     Buy
                   </Button>
                   <Button
                     onClick={() => setActiveTab('sell')}
                     variant={activeTab === 'sell' ? 'default' : 'ghost'}
-                    className={`flex-1 ${activeTab === 'sell' ? 'bg-red-500 text-white' : ''}`}
+                    className={`flex-1 ${activeTab === 'sell' ? 'bg-red-500 text-white hover:bg-red-600' : ''}`}
                   >
                     Sell
                   </Button>
