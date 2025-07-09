@@ -1,8 +1,7 @@
-
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowLeft, RefreshCw, Bell, Heart, Brain, TrendingUp, ExternalLink } from 'lucide-react';
+import { ArrowLeft, RefreshCw, Bell, Heart, Brain, TrendingUp, ExternalLink, Search } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,6 +9,7 @@ import { Label } from '@/components/ui/label';
 import { useWallet } from '@/hooks/useWallet';
 import { useToast } from '@/hooks/use-toast';
 import { TokenChart } from '@/components/TokenChart';
+import { TokenSearch } from '@/components/TokenSearch';
 import { useQuery } from '@tanstack/react-query';
 
 interface DexToken {
@@ -99,8 +99,8 @@ const Trade = () => {
     queryKey: ['token', contractAddress],
     queryFn: () => fetchTokenData(contractAddress!),
     enabled: !!contractAddress,
-    refetchInterval: 30000, // Refetch every 30 seconds
-    staleTime: 10000, // Consider data stale after 10 seconds
+    refetchInterval: 30000,
+    staleTime: 10000,
   });
 
   const fee = 0.001; // 0.001 ETH fee
@@ -348,6 +348,33 @@ const Trade = () => {
     );
   }
 
+  // If no contract address, show search interface
+  if (!contractAddress) {
+    return (
+      <div className="min-h-screen bg-gray-50 pt-32 pb-20 md:pb-6">
+        <div className="max-w-6xl mx-auto px-4 space-y-6">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-center space-y-4"
+          >
+            <h1 className="text-3xl font-bold text-gray-800">Search Base Tokens</h1>
+            <p className="text-gray-600">Find and trade tokens on the Base network</p>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="max-w-2xl mx-auto"
+          >
+            <TokenSearch onTokenSelect={(address) => navigate(`/trade/${address}`)} />
+          </motion.div>
+        </div>
+      </div>
+    );
+  }
+
   if (isTokenLoading) {
     return (
       <div className="min-h-screen bg-gray-50 pt-32 pb-20 md:pb-6 flex items-center justify-center">
@@ -373,20 +400,24 @@ const Trade = () => {
   return (
     <div className="min-h-screen bg-gray-50 pt-32 pb-20 md:pb-6">
       <div className="max-w-6xl mx-auto px-4 space-y-6">
-        {/* Header */}
+        {/* Header with Search */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="flex items-center justify-between"
         >
           <Button
-            onClick={() => navigate(-1)}
+            onClick={() => navigate('/trade')}
             variant="ghost"
             className="flex items-center space-x-2"
           >
             <ArrowLeft className="w-4 h-4" />
-            <span>Back</span>
+            <span>Search Tokens</span>
           </Button>
+
+          <div className="flex-1 max-w-md mx-4">
+            <TokenSearch onTokenSelect={(address) => navigate(`/trade/${address}`)} />
+          </div>
 
           <div className="flex items-center space-x-2">
             <Button
@@ -506,6 +537,7 @@ const Trade = () => {
                 <TokenChart 
                   price={parseFloat(tokenData.priceUsd)} 
                   symbol={tokenData.baseToken.symbol} 
+                  priceChange24h={tokenData.priceChange.h24}
                 />
               </CardContent>
             </Card>
