@@ -51,7 +51,8 @@ const Trade = () => {
         change24h: 2.3,
         marketCap: 6500000000,
         liquidity: 2500000,
-        volume24h: 1200000
+        volume24h: 1200000,
+        logoUrl: ''
       },
       '0x1111111111111111111111111111111111111111': {
         symbol: 'DOGE',
@@ -60,11 +61,15 @@ const Trade = () => {
         change24h: -1.2,
         marketCap: 11200000000,
         liquidity: 3800000,
-        volume24h: 2100000
+        volume24h: 2100000,
+        logoUrl: ''
       }
     };
 
-    const token = mockTokens[contractAddress as keyof typeof mockTokens] || mockTokens['0x0000000000000000000000000000000000000000'];
+    const token = mockTokens[contractAddress as keyof typeof mockTokens] || {
+      ...mockTokens['0x0000000000000000000000000000000000000000'],
+      logoUrl: ''
+    };
     setTokenData(token);
   }, [contractAddress]);
 
