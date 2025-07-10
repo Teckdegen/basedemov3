@@ -46,20 +46,21 @@ export const TokenChart = ({ price, symbol, priceChange24h = 0 }: TokenChartProp
     for (let i = points; i >= 0; i--) {
       const time = new Date(now.getTime() - (i * 30 * 60 * 1000));
       
-      // Create a realistic price progression
+      // Create a realistic price progression with more sophisticated volatility
       const progress = (points - i) / points;
       const trendPrice = startPrice + (price - startPrice) * progress;
       
-      // Add some random volatility (±5%)
-      const volatility = (Math.random() - 0.5) * 0.1;
-      const dataPrice = trendPrice * (1 + volatility);
+      // Add wave-like volatility for more realistic price movement
+      const waveVolatility = Math.sin(progress * Math.PI * 4) * 0.02;
+      const randomVolatility = (Math.random() - 0.5) * 0.05;
+      const dataPrice = trendPrice * (1 + waveVolatility + randomVolatility);
       
       data.push({
         time: time.toLocaleTimeString('en-US', { 
           hour: '2-digit', 
           minute: '2-digit' 
         }),
-        price: Math.max(dataPrice, 0.00000001) // Ensure price doesn't go negative
+        price: Math.max(dataPrice, 0.00000001)
       });
     }
     
@@ -71,11 +72,12 @@ export const TokenChart = ({ price, symbol, priceChange24h = 0 }: TokenChartProp
 
   const priceData = generatePriceData();
   const isPositive = priceChange24h >= 0;
+  const primaryColor = isPositive ? '#10B981' : '#EF4444';
+  const secondaryColor = isPositive ? '#059669' : '#DC2626';
 
   const chartData = {
     labels: priceData.map((point, index) => {
-      // Show fewer labels on mobile/small charts
-      if (index % 6 === 0) {
+      if (index % 8 === 0 || index === priceData.length - 1) {
         return point.time;
       }
       return '';
@@ -84,7 +86,7 @@ export const TokenChart = ({ price, symbol, priceChange24h = 0 }: TokenChartProp
       {
         label: `${symbol} Price (USD)`,
         data: priceData.map(point => point.price),
-        borderColor: isPositive ? '#10B981' : '#EF4444',
+        borderColor: primaryColor,
         backgroundColor: (context: any) => {
           const chart = context.chart;
           const { ctx, chartArea } = chart;
@@ -94,22 +96,30 @@ export const TokenChart = ({ price, symbol, priceChange24h = 0 }: TokenChartProp
           }
           
           const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
-          gradient.addColorStop(0, isPositive ? 'rgba(16, 185, 129, 0.3)' : 'rgba(239, 68, 68, 0.3)');
-          gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+          gradient.addColorStop(0, `${primaryColor}40`);
+          gradient.addColorStop(0.5, `${primaryColor}20`);
+          gradient.addColorStop(1, `${primaryColor}00`);
           
           return gradient;
         },
         borderWidth: 3,
         fill: true,
         tension: 0.4,
-        pointBackgroundColor: isPositive ? '#10B981' : '#EF4444',
+        pointBackgroundColor: primaryColor,
         pointBorderColor: '#ffffff',
-        pointBorderWidth: 2,
+        pointBorderWidth: 3,
         pointRadius: 0,
-        pointHoverRadius: 8,
-        pointHoverBackgroundColor: isPositive ? '#10B981' : '#EF4444',
+        pointHoverRadius: 10,
+        pointHoverBackgroundColor: primaryColor,
         pointHoverBorderColor: '#ffffff',
-        pointHoverBorderWidth: 3,
+        pointHoverBorderWidth: 4,
+        segment: {
+          borderColor: (ctx: any) => {
+            const current = ctx.p1.parsed.y;
+            const previous = ctx.p0.parsed.y;
+            return current >= previous ? '#10B981' : '#EF4444';
+          }
+        }
       }
     ]
   };
@@ -123,45 +133,51 @@ export const TokenChart = ({ price, symbol, priceChange24h = 0 }: TokenChartProp
       },
       title: {
         display: true,
-        text: `${symbol} - 24H Price Chart`,
-        color: '#374151',
+        text: `${symbol} - 24H Price Movement`,
+        color: '#1F2937',
         font: {
-          size: 16,
+          size: 18,
           weight: 'bold',
+          family: 'Inter, system-ui, sans-serif'
         },
         padding: {
-          bottom: 20
+          bottom: 25
         }
       },
       tooltip: {
-        backgroundColor: 'rgba(255, 255, 255, 0.95)',
-        titleColor: '#374151',
+        enabled: true,
+        backgroundColor: 'rgba(255, 255, 255, 0.98)',
+        titleColor: '#1F2937',
         bodyColor: '#374151',
-        borderColor: isPositive ? '#10B981' : '#EF4444',
+        borderColor: primaryColor,
         borderWidth: 2,
-        cornerRadius: 12,
+        cornerRadius: 16,
         displayColors: false,
         titleFont: {
-          size: 14,
-          weight: 'bold'
+          size: 15,
+          weight: 'bold',
+          family: 'Inter, system-ui, sans-serif'
         },
         bodyFont: {
-          size: 13
+          size: 14,
+          family: 'Inter, system-ui, sans-serif'
         },
-        padding: 12,
+        padding: 16,
+        boxShadow: '0 10px 25px rgba(0, 0, 0, 0.1)',
         callbacks: {
           title: function(context: any) {
-            return `Time: ${context[0].label}`;
+            return `📊 ${context[0].label}`;
           },
           label: function(context: any) {
             const value = context.parsed.y;
-            return `Price: $${value.toFixed(value < 0.01 ? 8 : 4)}`;
+            return `💰 $${value.toFixed(value < 0.01 ? 8 : 4)}`;
           },
           afterLabel: function(context: any) {
             const currentPrice = context.parsed.y;
             const startPrice = priceData[0].price;
             const change = ((currentPrice - startPrice) / startPrice) * 100;
-            return `Change: ${change >= 0 ? '+' : ''}${change.toFixed(2)}%`;
+            const emoji = change >= 0 ? '📈' : '📉';
+            return `${emoji} ${change >= 0 ? '+' : ''}${change.toFixed(2)}%`;
           }
         }
       }
@@ -170,38 +186,47 @@ export const TokenChart = ({ price, symbol, priceChange24h = 0 }: TokenChartProp
       x: {
         display: true,
         grid: {
-          display: false,
+          display: true,
+          color: 'rgba(156, 163, 175, 0.15)',
+          lineWidth: 1,
         },
         ticks: {
           color: '#6B7280',
           font: {
-            size: 11
+            size: 12,
+            family: 'Inter, system-ui, sans-serif'
           },
-          maxTicksLimit: 8,
+          maxTicksLimit: 6,
           autoSkip: true,
+          padding: 10,
         },
         title: {
           display: true,
-          text: 'Time (24H)',
+          text: '⏰ Time (24H)',
           color: '#6B7280',
           font: {
-            size: 12,
-            weight: 'bold'
-          }
+            size: 13,
+            weight: 'bold',
+            family: 'Inter, system-ui, sans-serif'
+          },
+          padding: 15
         }
       },
       y: {
         display: true,
         position: 'right',
         grid: {
-          color: 'rgba(107, 114, 128, 0.1)',
+          color: 'rgba(156, 163, 175, 0.15)',
+          lineWidth: 1,
         },
         ticks: {
           color: '#6B7280',
           font: {
-            size: 11
+            size: 12,
+            family: 'Inter, system-ui, sans-serif'
           },
-          maxTicksLimit: 6,
+          maxTicksLimit: 8,
+          padding: 15,
           callback: function(value: any) {
             const numValue = parseFloat(value);
             if (numValue < 0.01) {
@@ -209,18 +234,20 @@ export const TokenChart = ({ price, symbol, priceChange24h = 0 }: TokenChartProp
             } else if (numValue < 1) {
               return `$${numValue.toFixed(4)}`;
             } else {
-              return `$${numValue.toFixed(2)}`;
+              return `$${numValue.toLocaleString()}`;
             }
           }
         },
         title: {
           display: true,
-          text: 'Price (USD)',
+          text: '💲 Price (USD)',
           color: '#6B7280',
           font: {
-            size: 12,
-            weight: 'bold'
-          }
+            size: 13,
+            weight: 'bold',
+            family: 'Inter, system-ui, sans-serif'
+          },
+          padding: 15
         }
       }
     },
@@ -231,6 +258,7 @@ export const TokenChart = ({ price, symbol, priceChange24h = 0 }: TokenChartProp
     hover: {
       mode: 'index',
       intersect: false,
+      animationDuration: 300,
     },
     elements: {
       line: {
@@ -238,17 +266,41 @@ export const TokenChart = ({ price, symbol, priceChange24h = 0 }: TokenChartProp
         borderCapStyle: 'round',
       },
       point: {
-        hoverRadius: 8,
+        hoverRadius: 10,
+        hitRadius: 20,
       }
     },
     animation: {
-      duration: 1000,
-      easing: 'easeInOutQuart',
+      duration: 2000,
+      easing: 'easeInOutCubic',
+      delay: (context: any) => context.dataIndex * 50,
+    },
+    transitions: {
+      show: {
+        animations: {
+          x: {
+            from: 0
+          },
+          y: {
+            from: 0
+          }
+        }
+      },
+      hide: {
+        animations: {
+          x: {
+            to: 0
+          },
+          y: {
+            to: 0
+          }
+        }
+      }
     }
   };
 
   return (
-    <div className="w-full h-64 md:h-80 p-4">
+    <div className="w-full h-80 md:h-96 p-6 bg-gradient-to-br from-gray-50 to-white rounded-2xl shadow-lg">
       <Line ref={chartRef} data={chartData} options={options} />
     </div>
   );

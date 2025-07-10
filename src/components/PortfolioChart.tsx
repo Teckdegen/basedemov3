@@ -44,22 +44,43 @@ export const PortfolioChart = ({ data }: PortfolioChartProps) => {
     });
   };
 
+  // Calculate if portfolio is trending up or down
+  const isPositive = data.length > 1 ? data[data.length - 1].totalValue >= data[0].totalValue : true;
+  const primaryColor = isPositive ? '#10B981' : '#EF4444';
+
   const chartData = {
     labels: data.map(point => formatTime(point.timestamp)),
     datasets: [
       {
         label: 'Portfolio Value',
         data: data.map(point => point.totalValue),
-        borderColor: '#1E40AF',
-        backgroundColor: 'rgba(30, 64, 175, 0.1)',
-        borderWidth: 2,
+        borderColor: primaryColor,
+        backgroundColor: (context: any) => {
+          const chart = context.chart;
+          const { ctx, chartArea } = chart;
+          
+          if (!chartArea) {
+            return null;
+          }
+          
+          const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+          gradient.addColorStop(0, `${primaryColor}40`);
+          gradient.addColorStop(0.5, `${primaryColor}20`);
+          gradient.addColorStop(1, `${primaryColor}00`);
+          
+          return gradient;
+        },
+        borderWidth: 4,
         fill: true,
         tension: 0.4,
-        pointBackgroundColor: '#1E40AF',
+        pointBackgroundColor: primaryColor,
         pointBorderColor: '#ffffff',
-        pointBorderWidth: 2,
-        pointRadius: 4,
-        pointHoverRadius: 6,
+        pointBorderWidth: 3,
+        pointRadius: 6,
+        pointHoverRadius: 12,
+        pointHoverBackgroundColor: primaryColor,
+        pointHoverBorderColor: '#ffffff',
+        pointHoverBorderWidth: 4,
       }
     ]
   };
@@ -71,17 +92,53 @@ export const PortfolioChart = ({ data }: PortfolioChartProps) => {
       legend: {
         display: false,
       },
+      title: {
+        display: true,
+        text: '📈 Portfolio Performance',
+        color: '#1F2937',
+        font: {
+          size: 18,
+          weight: 'bold',
+          family: 'Inter, system-ui, sans-serif'
+        },
+        padding: {
+          bottom: 25
+        }
+      },
       tooltip: {
-        backgroundColor: 'rgba(255, 255, 255, 0.95)',
-        titleColor: '#374151',
+        enabled: true,
+        backgroundColor: 'rgba(255, 255, 255, 0.98)',
+        titleColor: '#1F2937',
         bodyColor: '#374151',
-        borderColor: 'rgba(30, 64, 175, 0.2)',
-        borderWidth: 1,
-        cornerRadius: 8,
+        borderColor: primaryColor,
+        borderWidth: 2,
+        cornerRadius: 16,
         displayColors: false,
+        titleFont: {
+          size: 15,
+          weight: 'bold',
+          family: 'Inter, system-ui, sans-serif'
+        },
+        bodyFont: {
+          size: 14,
+          family: 'Inter, system-ui, sans-serif'
+        },
+        padding: 16,
         callbacks: {
+          title: function(context: any) {
+            return `⏰ ${context[0].label}`;
+          },
           label: function(context: any) {
-            return `$${context.parsed.y.toFixed(2)} USDC`;
+            return `💰 $${context.parsed.y.toFixed(2)} USDC`;
+          },
+          afterLabel: function(context: any) {
+            if (data.length > 1) {
+              const change = context.parsed.y - data[0].totalValue;
+              const changePercent = (change / data[0].totalValue) * 100;
+              const emoji = change >= 0 ? '📈' : '📉';
+              return `${emoji} ${change >= 0 ? '+' : ''}$${change.toFixed(2)} (${changePercent.toFixed(2)}%)`;
+            }
+            return '';
           }
         }
       }
@@ -90,28 +147,58 @@ export const PortfolioChart = ({ data }: PortfolioChartProps) => {
       x: {
         display: true,
         grid: {
-          display: false,
+          display: true,
+          color: 'rgba(156, 163, 175, 0.15)',
+          lineWidth: 1,
         },
         ticks: {
           color: '#6B7280',
           font: {
-            size: 12
-          }
+            size: 12,
+            family: 'Inter, system-ui, sans-serif'
+          },
+          maxTicksLimit: 6,
+          padding: 10,
+        },
+        title: {
+          display: true,
+          text: '⏰ Time',
+          color: '#6B7280',
+          font: {
+            size: 13,
+            weight: 'bold',
+            family: 'Inter, system-ui, sans-serif'
+          },
+          padding: 15
         }
       },
       y: {
         display: true,
         grid: {
-          color: 'rgba(107, 114, 128, 0.1)',
+          color: 'rgba(156, 163, 175, 0.15)',
+          lineWidth: 1,
         },
         ticks: {
           color: '#6B7280',
           font: {
-            size: 12
+            size: 12,
+            family: 'Inter, system-ui, sans-serif'
           },
+          padding: 15,
           callback: function(value: any) {
-            return `$${value}`;
+            return `$${value.toLocaleString()}`;
           }
+        },
+        title: {
+          display: true,
+          text: '💲 Value (USDC)',
+          color: '#6B7280',
+          font: {
+            size: 13,
+            weight: 'bold',
+            family: 'Inter, system-ui, sans-serif'
+          },
+          padding: 15
         }
       }
     },
@@ -119,10 +206,30 @@ export const PortfolioChart = ({ data }: PortfolioChartProps) => {
       intersect: false,
       mode: 'index' as const,
     },
+    hover: {
+      mode: 'index' as const,
+      intersect: false,
+      animationDuration: 300,
+    },
+    elements: {
+      line: {
+        borderJoinStyle: 'round' as const,
+        borderCapStyle: 'round' as const,
+      },
+      point: {
+        hoverRadius: 12,
+        hitRadius: 20,
+      }
+    },
+    animation: {
+      duration: 2000,
+      easing: 'easeInOutCubic',
+      delay: (context: any) => context.dataIndex * 100,
+    },
   };
 
   return (
-    <div className="w-full h-64 md:h-80">
+    <div className="w-full h-80 md:h-96 p-6 bg-gradient-to-br from-blue-50 to-white rounded-2xl shadow-lg">
       <Line ref={chartRef} data={chartData} options={options} />
     </div>
   );
