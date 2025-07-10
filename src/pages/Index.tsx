@@ -50,8 +50,8 @@ const Index = () => {
               className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-2xl shadow-lg p-6 text-white max-w-md mx-auto"
             >
               <p className="text-blue-100 mb-1">Your Balance</p>
-              <p className="text-3xl font-bold">{profile.fakeUSDCBalance.toFixed(4)} ETH</p>
-              <p className="text-blue-100 text-sm">${(profile.fakeUSDCBalance * 2500).toLocaleString()}</p>
+              <p className="text-3xl font-bold">{profile.fakeUSDCBalance.toFixed(2)} USDC</p>
+              <p className="text-blue-100 text-sm">${profile.fakeUSDCBalance.toFixed(2)}</p>
             </motion.div>
           )}
 
@@ -165,7 +165,7 @@ const Index = () => {
               <CardContent className="p-4 text-center">
                 <p className="text-sm text-gray-600">Total Value</p>
                 <p className="text-xl font-bold text-blue-600">
-                  ${(profile.fakeUSDCBalance * 2500 + profile.portfolio.reduce((sum, t) => sum + (t.amount * t.lastPrice), 0)).toFixed(0)}
+                  ${(profile.fakeUSDCBalance + profile.portfolio.reduce((sum, t) => sum + (t.amount * t.lastPrice), 0)).toFixed(0)}
                 </p>
                 <p className="text-xs text-gray-500">USD</p>
               </CardContent>
