@@ -199,7 +199,7 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
         userProfile = createNewProfile(address);
         toast({
           title: "Welcome to Base Wallet!",
-          description: "You've been given 1,500 fake ETH to start trading.",
+          description: "You've been given 1,500 USDC to start trading.",
         });
       }
 

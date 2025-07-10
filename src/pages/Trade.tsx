@@ -104,7 +104,7 @@ const Trade = () => {
     staleTime: 10000,
   });
 
-  const fee = 0.001; // 0.001 ETH fee
+  const fee = 1; // 1 USDC fee
   const currentTime = new Date().toLocaleTimeString('en-US', {
     hour: 'numeric',
     minute: '2-digit',
@@ -118,8 +118,8 @@ const Trade = () => {
 
     if (activeTab === 'buy' && ethAmount) {
       const amount = parseFloat(ethAmount);
-      if (!isNaN(amount) && tokenData.priceNative) {
-        const tokens = amount / parseFloat(tokenData.priceNative);
+      if (!isNaN(amount) && tokenData.priceUsd) {
+        const tokens = amount / parseFloat(tokenData.priceUsd);
         const tokensAfterSlippage = tokens * (1 - slippage / 100);
         setTokenAmount(tokensAfterSlippage.toFixed(6));
       }
@@ -137,16 +137,16 @@ const Trade = () => {
     if (total > profile.fakeUSDCBalance) {
       toast({
         title: "Insufficient Balance",
-        description: "Not enough ETH in your wallet",
+        description: "Not enough USDC in your wallet",
         variant: "destructive"
       });
       return;
     }
 
-    if (amount < 0.001) {
+    if (amount < 1) {
       toast({
         title: "Invalid Amount",
-        description: "Minimum buy amount is 0.001 ETH",
+        description: "Minimum buy amount is 1 USDC",
         variant: "destructive"
       });
       return;
@@ -158,7 +158,7 @@ const Trade = () => {
       // Simulate transaction delay
       await new Promise(resolve => setTimeout(resolve, 2000));
 
-      const tokens = amount / parseFloat(tokenData.priceNative);
+      const tokens = amount / parseFloat(tokenData.priceUsd);
       const tokensAfterSlippage = tokens * (1 - slippage / 100);
       const currentPrice = parseFloat(tokenData.priceUsd);
 
@@ -267,17 +267,17 @@ const Trade = () => {
     try {
       await new Promise(resolve => setTimeout(resolve, 2000));
 
-      const ethReturn = amount * parseFloat(tokenData.priceNative);
-      const ethAfterSlippage = ethReturn * (1 - slippage / 100);
-      const finalAmount = ethAfterSlippage - fee;
+      const usdcReturn = amount * parseFloat(tokenData.priceUsd);
+      const usdcAfterSlippage = usdcReturn * (1 - slippage / 100);
+      const finalAmount = usdcAfterSlippage - fee;
       const currentPrice = parseFloat(tokenData.priceUsd);
 
       const profit = (currentPrice - existingToken.buyPrice) * amount;
 
       console.log('Sell transaction:', { 
         amount, 
-        ethReturn, 
-        ethAfterSlippage, 
+        usdcReturn, 
+        usdcAfterSlippage, 
         finalAmount, 
         currentBalance: profile.fakeUSDCBalance 
       });
@@ -334,7 +334,7 @@ const Trade = () => {
 
       toast({
         title: "Trade Successful",
-        description: `Sold ${amount.toLocaleString()} ${tokenData.baseToken.symbol} for ${finalAmount.toFixed(4)} ETH`,
+        description: `Sold ${amount.toLocaleString()} ${tokenData.baseToken.symbol} for ${finalAmount.toFixed(2)} USDC`,
       });
 
       setEthAmount('');
@@ -415,8 +415,8 @@ const Trade = () => {
           >
             <div className="text-center">
               <p className="text-blue-100 mb-1">Available Balance</p>
-              <p className="text-3xl font-bold">{profile.fakeUSDCBalance.toFixed(4)} ETH</p>
-              <p className="text-blue-100 text-sm">${(profile.fakeUSDCBalance * 2500).toLocaleString()}</p>
+              <p className="text-3xl font-bold">{profile.fakeUSDCBalance.toFixed(2)} USDC</p>
+              <p className="text-blue-100 text-sm">${profile.fakeUSDCBalance.toFixed(2)}</p>
             </div>
           </motion.div>
 
@@ -594,8 +594,8 @@ const Trade = () => {
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="text-center sm:text-left">
               <p className="text-blue-100 mb-1">Your Balance</p>
-              <p className="text-3xl font-bold">{profile.fakeUSDCBalance.toFixed(4)} ETH</p>
-              <p className="text-blue-100 text-sm">${(profile.fakeUSDCBalance * 2500).toLocaleString()}</p>
+              <p className="text-3xl font-bold">{profile.fakeUSDCBalance.toFixed(2)} USDC</p>
+              <p className="text-blue-100 text-sm">${profile.fakeUSDCBalance.toFixed(2)}</p>
             </div>
             {existingToken && (
               <div className="text-center sm:text-right">
@@ -737,7 +737,7 @@ const Trade = () => {
                 {activeTab === 'buy' ? (
                   <>
                     <div>
-                      <Label htmlFor="eth-amount">ETH Amount</Label>
+                      <Label htmlFor="eth-amount">USDC Amount</Label>
                       <div className="flex space-x-2">
                         <Input
                           id="eth-amount"
@@ -757,7 +757,7 @@ const Trade = () => {
                         </Button>
                       </div>
                       <p className="text-sm text-gray-500 mt-1">
-                        Available: {profile.fakeUSDCBalance.toFixed(3)} ETH
+                        Available: {profile.fakeUSDCBalance.toFixed(2)} USDC
                       </p>
                     </div>
 
@@ -786,11 +786,11 @@ const Trade = () => {
                     <div className="space-y-2 text-sm text-gray-600">
                       <div className="flex justify-between">
                         <span>Fee:</span>
-                        <span>{fee} ETH</span>
+                        <span>{fee} USDC</span>
                       </div>
                       <div className="flex justify-between font-semibold">
                         <span>Total:</span>
-                        <span>{(parseFloat(ethAmount || '0') + fee).toFixed(3)} ETH</span>
+                        <span>{(parseFloat(ethAmount || '0') + fee).toFixed(2)} USDC</span>
                       </div>
                     </div>
 
@@ -831,9 +831,9 @@ const Trade = () => {
                     </div>
 
                     <div>
-                      <Label>Estimated ETH</Label>
+                      <Label>Estimated USDC</Label>
                       <Input
-                        value={tokenAmount ? ((parseFloat(tokenAmount) * parseFloat(tokenData.priceNative) * (1 - slippage / 100)) - fee).toFixed(4) : ''}
+                        value={tokenAmount ? ((parseFloat(tokenAmount) * parseFloat(tokenData.priceUsd) * (1 - slippage / 100)) - fee).toFixed(2) : ''}
                         readOnly
                         className="bg-gray-50"
                       />
@@ -864,7 +864,7 @@ const Trade = () => {
                         </div>
                         <div className="flex justify-between">
                           <span>Fee:</span>
-                          <span>{fee} ETH</span>
+                          <span>{fee} USDC</span>
                         </div>
                         <div className="flex justify-between font-semibold">
                           <span>Profit/Loss:</span>
