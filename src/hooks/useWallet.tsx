@@ -1,3 +1,4 @@
+
 import { useState, useEffect, createContext, useContext, ReactNode } from 'react';
 import { useAccount, useDisconnect } from 'wagmi';
 import { useToast } from '@/hooks/use-toast';
@@ -97,6 +98,7 @@ export const useWallet = () => {
 
 export const WalletProvider = ({ children }: { children: ReactNode }) => {
   const [profile, setProfile] = useState<WalletProfile | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
   const { address, isConnected } = useAccount();
   const { disconnect: wagmiDisconnect } = useDisconnect();
@@ -131,6 +133,38 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
     };
   };
 
+  // Load profile from localStorage on mount
+  useEffect(() => {
+    const loadProfile = () => {
+      const lastConnectedWallet = localStorage.getItem('lastConnectedWallet');
+      
+      if (lastConnectedWallet) {
+        const profileKey = `baseDemoProfile_${lastConnectedWallet}`;
+        const existingProfile = localStorage.getItem(profileKey);
+        
+        if (existingProfile) {
+          try {
+            const userProfile = JSON.parse(existingProfile);
+            // Validate profile structure
+            if (userProfile.walletAddress && typeof userProfile.fakeUSDCBalance === 'number') {
+              setProfile(userProfile);
+              console.log('Profile loaded from localStorage:', userProfile);
+            }
+          } catch (error) {
+            console.error('Error parsing profile:', error);
+            localStorage.removeItem(profileKey);
+            localStorage.removeItem('lastConnectedWallet');
+          }
+        }
+      }
+      setIsLoading(false);
+    };
+
+    // Small delay to ensure React has mounted
+    const timer = setTimeout(loadProfile, 100);
+    return () => clearTimeout(timer);
+  }, []);
+
   const connect = (address: string) => {
     try {
       // Validate address format
@@ -150,6 +184,7 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
           if (!userProfile.walletAddress || userProfile.fakeUSDCBalance < 0) {
             throw new Error('Corrupted profile data');
           }
+          console.log('Existing profile loaded:', userProfile);
         } catch (error) {
           // If profile is corrupted, create new one
           userProfile = createNewProfile(address);
@@ -163,16 +198,17 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
         // Create new profile
         userProfile = createNewProfile(address);
         toast({
-          title: "Welcome to Base Demo!",
-          description: "You've been given 1,500 fake USDC to start trading.",
+          title: "Welcome to Base Wallet!",
+          description: "You've been given 1,500 fake ETH to start trading.",
         });
       }
 
-      // Save profile
+      // Save profile immediately
       localStorage.setItem(profileKey, JSON.stringify(userProfile));
       localStorage.setItem('lastConnectedWallet', address);
 
       setProfile(userProfile);
+      console.log('Profile connected and saved:', userProfile);
 
       toast({
         title: "Wallet Connected",
@@ -180,6 +216,7 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
       });
 
     } catch (error) {
+      console.error('Connection error:', error);
       toast({
         title: "Connection Failed",
         description: "Failed to connect wallet. Please try again.",
@@ -205,23 +242,48 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const updateProfile = (updates: Partial<WalletProfile>) => {
-    if (!profile || !address) return;
+    if (!profile || !address) {
+      console.warn('Cannot update profile: no profile or address');
+      return;
+    }
 
     const updatedProfile = { ...profile, ...updates };
     setProfile(updatedProfile);
     
     const profileKey = `baseDemoProfile_${address}`;
     localStorage.setItem(profileKey, JSON.stringify(updatedProfile));
+    
+    console.log('Profile updated and saved:', updatedProfile);
   };
 
   // Watch for account changes from RainbowKit
   useEffect(() => {
-    if (isConnected && address) {
+    if (isConnected && address && !isLoading) {
       connect(address);
-    } else if (!isConnected) {
+    } else if (!isConnected && !isLoading) {
       setProfile(null);
     }
-  }, [isConnected, address]);
+  }, [isConnected, address, isLoading]);
+
+  // Auto-reconnect on page load if wallet was previously connected
+  useEffect(() => {
+    if (!isLoading && !isConnected && !profile) {
+      const lastConnectedWallet = localStorage.getItem('lastConnectedWallet');
+      if (lastConnectedWallet) {
+        // Don't auto-connect, just load the profile data for display
+        const profileKey = `baseDemoProfile_${lastConnectedWallet}`;
+        const existingProfile = localStorage.getItem(profileKey);
+        if (existingProfile) {
+          try {
+            const userProfile = JSON.parse(existingProfile);
+            console.log('Profile data available but wallet not connected');
+          } catch (error) {
+            console.error('Error loading cached profile:', error);
+          }
+        }
+      }
+    }
+  }, [isLoading, isConnected, profile]);
 
   return (
     <WalletContext.Provider value={{

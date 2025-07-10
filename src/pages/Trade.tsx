@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowLeft, RefreshCw, Bell, Heart, Brain, TrendingUp, ExternalLink, Search } from 'lucide-react';
+import { ArrowLeft, RefreshCw, Bell, Heart, Brain, TrendingUp, ExternalLink, Search, User, AlertCircle, ArrowLeftRight } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -374,8 +374,14 @@ const Trade = () => {
 
   if (!profile) {
     return (
-      <div className="min-h-screen bg-gray-50 pt-32 pb-20 md:pb-6 flex items-center justify-center">
-        <p>Please connect your wallet to continue</p>
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 pt-24 pb-20 md:pb-6 flex items-center justify-center">
+        <div className="text-center space-y-4 p-8 bg-white rounded-2xl shadow-xl border border-gray-200">
+          <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto">
+            <User className="w-8 h-8 text-blue-600" />
+          </div>
+          <h2 className="text-xl font-semibold text-gray-800">Connect Your Wallet</h2>
+          <p className="text-gray-600">Please connect your wallet to start trading</p>
+        </div>
       </div>
     );
   }
@@ -383,15 +389,18 @@ const Trade = () => {
   // If no contract address, show search interface
   if (!contractAddress) {
     return (
-      <div className="min-h-screen bg-gray-50 pt-32 pb-20 md:pb-6">
-        <div className="max-w-6xl mx-auto px-4 space-y-6">
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 pt-24 pb-20 md:pb-6">
+        <div className="max-w-6xl mx-auto px-4 space-y-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-center space-y-4"
+            className="text-center space-y-6"
           >
-            <h1 className="text-3xl font-bold text-gray-800">Search Base Tokens</h1>
-            <p className="text-gray-600">Find and trade tokens on the Base network</p>
+            <div className="inline-flex items-center space-x-3 px-6 py-3 bg-white rounded-2xl shadow-lg border border-gray-200">
+              <ArrowLeftRight className="w-6 h-6 text-blue-600" />
+              <h1 className="text-3xl font-bold text-gray-800">Trade Tokens</h1>
+            </div>
+            <p className="text-gray-600 text-lg">Discover and trade tokens on the Base network</p>
           </motion.div>
 
           <motion.div
@@ -400,7 +409,43 @@ const Trade = () => {
             transition={{ delay: 0.1 }}
             className="max-w-2xl mx-auto"
           >
-            <TokenSearch onTokenSelect={(address) => navigate(`/trade/${address}`)} />
+            <div className="bg-white rounded-2xl shadow-xl border border-gray-200 p-6">
+              <TokenSearch onTokenSelect={(address) => navigate(`/trade/${address}`)} />
+            </div>
+          </motion.div>
+
+          {/* Popular tokens or recent trades could go here */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="grid md:grid-cols-2 gap-6"
+          >
+            <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6">
+              <h3 className="text-lg font-semibold text-gray-800 mb-4">Quick Start</h3>
+              <ul className="space-y-3 text-gray-600">
+                <li className="flex items-center space-x-2">
+                  <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
+                  <span>Search for any Base token</span>
+                </li>
+                <li className="flex items-center space-x-2">
+                  <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
+                  <span>View real-time price charts</span>
+                </li>
+                <li className="flex items-center space-x-2">
+                  <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
+                  <span>Buy and sell with low fees</span>
+                </li>
+              </ul>
+            </div>
+            
+            <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6">
+              <h3 className="text-lg font-semibold text-gray-800 mb-4">Your Balance</h3>
+              <div className="text-3xl font-bold text-blue-600 mb-2">
+                {profile.fakeUSDCBalance.toFixed(4)} ETH
+              </div>
+              <p className="text-gray-600">Available for trading</p>
+            </div>
           </motion.div>
         </div>
       </div>
@@ -409,18 +454,27 @@ const Trade = () => {
 
   if (isTokenLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 pt-32 pb-20 md:pb-6 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 pt-24 pb-20 md:pb-6 flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-2 border-blue-600 border-t-transparent mx-auto"></div>
+          <p className="text-gray-600">Loading token data...</p>
+        </div>
       </div>
     );
   }
 
   if (tokenError || !tokenData) {
     return (
-      <div className="min-h-screen bg-gray-50 pt-32 pb-20 md:pb-6 flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-red-500 mb-4">Failed to load token data</p>
-          <Button onClick={() => refetchToken()}>Try Again</Button>
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 pt-24 pb-20 md:pb-6 flex items-center justify-center">
+        <div className="text-center space-y-4 p-8 bg-white rounded-2xl shadow-xl border border-gray-200">
+          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto">
+            <AlertCircle className="w-8 h-8 text-red-600" />
+          </div>
+          <h2 className="text-xl font-semibold text-gray-800">Failed to Load Token</h2>
+          <p className="text-gray-600">Unable to fetch token data from DexScreener</p>
+          <Button onClick={() => refetchToken()} className="bg-blue-600 hover:bg-blue-700">
+            Try Again
+          </Button>
         </div>
       </div>
     );
@@ -430,21 +484,21 @@ const Trade = () => {
   const isPositive = tokenData.priceChange.h24 >= 0;
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-32 pb-20 md:pb-6">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 pt-24 pb-20 md:pb-6">
       <div className="max-w-6xl mx-auto px-4 space-y-6">
         {/* Header with Search and Quick Trade */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex items-center justify-between"
+          className="flex items-center justify-between bg-white rounded-2xl shadow-lg border border-gray-200 p-4"
         >
           <Button
             onClick={() => navigate('/trade')}
             variant="ghost"
-            className="flex items-center space-x-2"
+            className="flex items-center space-x-2 text-gray-600 hover:text-blue-600"
           >
             <ArrowLeft className="w-4 h-4" />
-            <span>Search Tokens</span>
+            <span>Back to Search</span>
           </Button>
 
           <div className="flex-1 max-w-md mx-4">
@@ -452,12 +506,11 @@ const Trade = () => {
           </div>
 
           <div className="flex items-center space-x-2">
-            {/* Quick Trade Buttons */}
             <Button
               onClick={() => setActiveTab('buy')}
               variant={activeTab === 'buy' ? 'default' : 'outline'}
               size="sm"
-              className={`min-w-[60px] ${activeTab === 'buy' ? 'bg-green-600 hover:bg-green-700 text-white' : ''}`}
+              className={`${activeTab === 'buy' ? 'bg-green-600 hover:bg-green-700 text-white' : 'hover:bg-green-50 hover:text-green-600'} rounded-xl`}
             >
               <TrendingUp className="w-4 h-4 mr-1" />
               Buy
@@ -466,7 +519,7 @@ const Trade = () => {
               onClick={() => setActiveTab('sell')}
               variant={activeTab === 'sell' ? 'default' : 'outline'}
               size="sm"
-              className={`min-w-[60px] ${activeTab === 'sell' ? 'bg-red-500 hover:bg-red-600 text-white' : ''}`}
+              className={`${activeTab === 'sell' ? 'bg-red-500 hover:bg-red-600 text-white' : 'hover:bg-red-50 hover:text-red-600'} rounded-xl`}
               disabled={!existingToken}
             >
               <TrendingUp className="w-4 h-4 mr-1 rotate-180" />
@@ -476,21 +529,21 @@ const Trade = () => {
               onClick={addToWatchlist}
               variant="outline"
               size="sm"
-              className="min-w-[48px] h-[48px] md:min-w-auto md:h-auto"
+              className="hover:bg-pink-50 hover:text-pink-600 rounded-xl"
             >
               <Heart className="w-4 h-4" />
             </Button>
             <Button
               variant="outline"
               size="sm"
-              className="min-w-[48px] h-[48px] md:min-w-auto md:h-auto"
+              className="hover:bg-yellow-50 hover:text-yellow-600 rounded-xl"
             >
               <Bell className="w-4 h-4" />
             </Button>
             <Button
               variant="outline"
               size="sm"
-              className="min-w-[48px] h-[48px] md:min-w-auto md:h-auto"
+              className="hover:bg-blue-50 hover:text-blue-600 rounded-xl"
               onClick={() => window.open(tokenData.url, '_blank')}
             >
               <ExternalLink className="w-4 h-4" />
@@ -503,20 +556,21 @@ const Trade = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.05 }}
-          className="bg-blue-50 border border-blue-200 rounded-lg p-4"
+          className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-2xl shadow-lg p-6 text-white"
         >
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-blue-600">Your Balance</p>
-              <p className="text-2xl font-bold text-blue-800">{profile.fakeUSDCBalance.toFixed(4)} ETH</p>
+              <p className="text-blue-100 mb-1">Your Balance</p>
+              <p className="text-3xl font-bold">{profile.fakeUSDCBalance.toFixed(4)} ETH</p>
+              <p className="text-blue-100 text-sm">${(profile.fakeUSDCBalance * 2500).toLocaleString()}</p>
             </div>
             {existingToken && (
               <div className="text-right">
-                <p className="text-sm text-blue-600">Holdings</p>
-                <p className="text-lg font-semibold text-blue-800">
+                <p className="text-blue-100 mb-1">Holdings</p>
+                <p className="text-xl font-semibold">
                   {existingToken.amount.toLocaleString()} {tokenData.baseToken.symbol}
                 </p>
-                <p className="text-sm text-gray-600">
+                <p className="text-blue-100 text-sm">
                   ${(existingToken.amount * parseFloat(tokenData.priceUsd)).toFixed(2)}
                 </p>
               </div>
@@ -530,7 +584,7 @@ const Trade = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
         >
-          <Card className="backdrop-blur-md bg-white/80 border border-white/20 shadow-xl">
+          <Card className="backdrop-blur-md bg-white/80 border border-white/20 shadow-xl rounded-2xl">
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4">
@@ -595,7 +649,7 @@ const Trade = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
           >
-            <Card className="backdrop-blur-md bg-white/80 border border-white/20 shadow-xl">
+            <Card className="backdrop-blur-md bg-white/80 border border-white/20 shadow-xl rounded-2xl">
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-xl font-bold text-gray-800">
@@ -605,7 +659,7 @@ const Trade = () => {
                     variant="outline"
                     size="sm"
                     onClick={() => refetchToken()}
-                    className="min-w-[48px] h-[48px] md:min-w-auto md:h-auto"
+                    className="min-w-[48px] h-[48px] md:min-w-auto md:h-auto rounded-xl"
                   >
                     <RefreshCw className="w-4 h-4" />
                   </Button>
@@ -627,20 +681,20 @@ const Trade = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
           >
-            <Card className="backdrop-blur-md bg-white/80 border border-white/20 shadow-xl">
+            <Card className="backdrop-blur-md bg-white/80 border border-white/20 shadow-xl rounded-2xl">
               <CardHeader>
                 <div className="flex space-x-1">
                   <Button
                     onClick={() => setActiveTab('buy')}
                     variant={activeTab === 'buy' ? 'default' : 'ghost'}
-                    className={`flex-1 ${activeTab === 'buy' ? 'bg-green-600 text-white hover:bg-green-700' : ''}`}
+                    className={`flex-1 ${activeTab === 'buy' ? 'bg-green-600 text-white hover:bg-green-700 rounded-xl' : 'rounded-xl'}`}
                   >
                     Buy
                   </Button>
                   <Button
                     onClick={() => setActiveTab('sell')}
                     variant={activeTab === 'sell' ? 'default' : 'ghost'}
-                    className={`flex-1 ${activeTab === 'sell' ? 'bg-red-500 text-white hover:bg-red-600' : ''}`}
+                    className={`flex-1 ${activeTab === 'sell' ? 'bg-red-500 text-white hover:bg-red-600 rounded-xl' : 'rounded-xl'}`}
                   >
                     Sell
                   </Button>
@@ -664,7 +718,7 @@ const Trade = () => {
                         <Button
                           onClick={() => setEthAmount((profile.fakeUSDCBalance - fee).toFixed(3))}
                           variant="outline"
-                          className="min-w-[48px] h-[48px] md:min-w-auto md:h-auto"
+                          className="min-w-[48px] h-[48px] md:min-w-auto md:h-auto rounded-xl"
                         >
                           Max
                         </Button>
@@ -710,7 +764,7 @@ const Trade = () => {
                     <Button
                       onClick={handleBuy}
                       disabled={!ethAmount || isLoading}
-                      className="w-full bg-blue-600 hover:bg-blue-700 text-white min-h-[48px]"
+                      className="w-full bg-blue-600 hover:bg-blue-700 text-white min-h-[48px] rounded-xl"
                     >
                       {isLoading ? 'Processing...' : `Buy ${tokenData.baseToken.symbol}`}
                     </Button>
@@ -733,7 +787,7 @@ const Trade = () => {
                           onClick={() => existingToken && setTokenAmount(existingToken.amount.toString())}
                           variant="outline"
                           disabled={!existingToken}
-                          className="min-w-[48px] h-[48px] md:min-w-auto md:h-auto"
+                          className="min-w-[48px] h-[48px] md:min-w-auto md:h-auto rounded-xl"
                         >
                           Max
                         </Button>
@@ -791,7 +845,7 @@ const Trade = () => {
                     <Button
                       onClick={handleSell}
                       disabled={!tokenAmount || !existingToken || isLoading}
-                      className="w-full bg-red-500 hover:bg-red-600 text-white min-h-[48px]"
+                      className="w-full bg-red-500 hover:bg-red-600 text-white min-h-[48px] rounded-xl"
                     >
                       {isLoading ? 'Processing...' : `Sell ${tokenData.baseToken.symbol}`}
                     </Button>
@@ -808,7 +862,7 @@ const Trade = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
         >
-          <Card className="backdrop-blur-md bg-white/80 border border-white/20 shadow-xl">
+          <Card className="backdrop-blur-md bg-white/80 border border-white/20 shadow-xl rounded-2xl">
             <CardHeader>
               <CardTitle className="text-xl font-bold text-gray-800">
                 Trading Statistics

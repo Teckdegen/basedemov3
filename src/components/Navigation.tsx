@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Link, useLocation } from 'react-router-dom';
-import { Home, TrendingUp, BarChart3, Info, User, LogOut } from 'lucide-react';
+import { Home, TrendingUp, BarChart3, Info, User, LogOut, ArrowLeftRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useWallet } from '@/hooks/useWallet';
 import { WalletModal } from '@/components/WalletModal';
@@ -15,6 +15,7 @@ export const Navigation = () => {
   const navItems = [
     { path: '/', icon: Home, label: 'Home' },
     { path: '/portfolio', icon: TrendingUp, label: 'Portfolio' },
+    { path: '/trade', icon: ArrowLeftRight, label: 'Trade' },
     { path: '/pnl', icon: BarChart3, label: 'P&L' },
     { path: '/about', icon: Info, label: 'About' },
   ];
@@ -26,19 +27,26 @@ export const Navigation = () => {
   return (
     <>
       {/* Desktop Navigation */}
-      <div className="hidden md:block fixed top-16 left-0 right-0 z-30">
-        <nav className="backdrop-blur-md bg-white/15 border-b border-white/20 px-6 py-3">
+      <div className="hidden md:block fixed top-0 left-0 right-0 z-30">
+        <nav className="backdrop-blur-md bg-white/90 border-b border-gray-200/50 px-6 py-4 shadow-sm">
           <div className="flex items-center justify-between max-w-7xl mx-auto">
-            <div className="flex items-center space-x-6">
+            <div className="flex items-center space-x-1">
+              <div className="flex items-center space-x-2 mr-6">
+                <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+                  <span className="text-white font-bold text-sm">B</span>
+                </div>
+                <span className="font-bold text-xl text-gray-800">Base Wallet</span>
+              </div>
+              
               {navItems.map((item) => (
                 <Link
                   key={item.path}
                   to={item.path}
-                  className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-200 ${
+                  className={`flex items-center space-x-2 px-4 py-2 rounded-xl transition-all duration-200 font-medium ${
                     location.pathname === item.path
-                      ? 'bg-blue-600 text-white'
+                      ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/25'
                       : isConnected || item.path === '/' || item.path === '/about'
-                      ? 'text-gray-700 hover:bg-white/20 hover:text-blue-600'
+                      ? 'text-gray-700 hover:bg-gray-100 hover:text-blue-600'
                       : 'text-gray-400 cursor-not-allowed opacity-50'
                   }`}
                   onClick={(e) => {
@@ -49,7 +57,7 @@ export const Navigation = () => {
                   }}
                 >
                   <item.icon className="w-5 h-5" />
-                  <span className="font-medium">{item.label}</span>
+                  <span>{item.label}</span>
                 </Link>
               ))}
             </div>
@@ -57,7 +65,7 @@ export const Navigation = () => {
             <div className="flex items-center space-x-4">
               {isConnected ? (
                 <>
-                  <div className="flex items-center space-x-2 px-3 py-2 bg-blue-600/10 rounded-lg">
+                  <div className="flex items-center space-x-2 px-4 py-2 bg-blue-50 border border-blue-200 rounded-xl">
                     <User className="w-4 h-4 text-blue-600" />
                     <span className="text-sm font-medium text-blue-600">
                       {walletAddress && truncateAddress(walletAddress)}
@@ -67,7 +75,7 @@ export const Navigation = () => {
                     onClick={disconnect}
                     variant="outline"
                     size="sm"
-                    className="border-red-500 text-red-500 hover:bg-red-500 hover:text-white"
+                    className="border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300 rounded-xl"
                   >
                     <LogOut className="w-4 h-4 mr-2" />
                     Disconnect
@@ -76,7 +84,7 @@ export const Navigation = () => {
               ) : (
                 <Button
                   onClick={() => setShowWalletModal(true)}
-                  className="bg-blue-600 hover:bg-blue-700 text-white"
+                  className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-lg shadow-blue-600/25"
                 >
                   Connect Wallet
                 </Button>
@@ -88,20 +96,19 @@ export const Navigation = () => {
 
       {/* Mobile Navigation */}
       <div className="md:hidden fixed bottom-0 left-0 right-0 z-30">
-        <nav className="backdrop-blur-md bg-white/15 border-t border-white/20 px-4 py-2">
+        <nav className="backdrop-blur-md bg-white/90 border-t border-gray-200/50 px-2 py-2 shadow-lg">
           <div className="flex items-center justify-around">
             {navItems.map((item) => (
               <Link
                 key={item.path}
                 to={item.path}
-                className={`flex flex-col items-center space-y-1 p-2 rounded-lg transition-all duration-200 ${
+                className={`flex flex-col items-center space-y-1 p-3 rounded-2xl transition-all duration-200 min-w-[60px] ${
                   location.pathname === item.path
-                    ? 'text-blue-600'
+                    ? 'text-blue-600 bg-blue-50'
                     : isConnected || item.path === '/' || item.path === '/about'
-                    ? 'text-gray-600 hover:text-blue-600'
+                    ? 'text-gray-600 hover:text-blue-600 hover:bg-gray-50'
                     : 'text-gray-400 cursor-not-allowed opacity-50'
                 }`}
-                style={{ minWidth: '48px', minHeight: '48px' }}
                 onClick={(e) => {
                   if (!isConnected && item.path !== '/' && item.path !== '/about') {
                     e.preventDefault();
