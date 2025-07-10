@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Link, useLocation } from 'react-router-dom';
-import { Home, TrendingUp, BarChart3, Info, User, LogOut, ArrowLeftRight } from 'lucide-react';
+import { Home, TrendingUp, BarChart3, User, LogOut, ArrowLeftRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useWallet } from '@/hooks/useWallet';
 import { WalletModal } from '@/components/WalletModal';
@@ -17,7 +17,6 @@ export const Navigation = () => {
     { path: '/portfolio', icon: TrendingUp, label: 'Portfolio' },
     { path: '/trade', icon: ArrowLeftRight, label: 'Trade' },
     { path: '/pnl', icon: BarChart3, label: 'P&L' },
-    { path: '/about', icon: Info, label: 'About' },
   ];
 
   const truncateAddress = (address: string) => {
@@ -35,7 +34,7 @@ export const Navigation = () => {
                 <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
                   <span className="text-white font-bold text-sm">B</span>
                 </div>
-                <span className="font-bold text-xl text-gray-800">Base Wallet</span>
+                <span className="font-bold text-xl text-gray-800">Base Demo</span>
               </div>
               
               {navItems.map((item) => (
@@ -45,12 +44,12 @@ export const Navigation = () => {
                   className={`flex items-center space-x-2 px-4 py-2 rounded-xl transition-all duration-200 font-medium ${
                     location.pathname === item.path
                       ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/25'
-                      : isConnected || item.path === '/' || item.path === '/about'
+                      : isConnected || item.path === '/'
                       ? 'text-gray-700 hover:bg-gray-100 hover:text-blue-600'
                       : 'text-gray-400 cursor-not-allowed opacity-50'
                   }`}
                   onClick={(e) => {
-                    if (!isConnected && item.path !== '/' && item.path !== '/about') {
+                    if (!isConnected && item.path !== '/') {
                       e.preventDefault();
                       setShowWalletModal(true);
                     }
@@ -105,12 +104,12 @@ export const Navigation = () => {
                 className={`flex flex-col items-center space-y-1 p-3 rounded-2xl transition-all duration-200 min-w-[60px] ${
                   location.pathname === item.path
                     ? 'text-blue-600 bg-blue-50'
-                    : isConnected || item.path === '/' || item.path === '/about'
+                    : isConnected || item.path === '/'
                     ? 'text-gray-600 hover:text-blue-600 hover:bg-gray-50'
                     : 'text-gray-400 cursor-not-allowed opacity-50'
                 }`}
                 onClick={(e) => {
-                  if (!isConnected && item.path !== '/' && item.path !== '/about') {
+                  if (!isConnected && item.path !== '/') {
                     e.preventDefault();
                     setShowWalletModal(true);
                   }

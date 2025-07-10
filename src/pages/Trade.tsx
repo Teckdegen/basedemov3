@@ -1,7 +1,8 @@
+
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowLeft, RefreshCw, Bell, Heart, Brain, TrendingUp, ExternalLink, Search, User, AlertCircle, ArrowLeftRight } from 'lucide-react';
+import { ArrowLeft, RefreshCw, Bell, Heart, TrendingUp, ExternalLink, User, AlertCircle, ArrowLeftRight } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -375,13 +376,15 @@ const Trade = () => {
   if (!profile) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 pt-24 pb-20 md:pb-6 flex items-center justify-center">
-        <div className="text-center space-y-4 p-8 bg-white rounded-2xl shadow-xl border border-gray-200">
-          <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto">
-            <User className="w-8 h-8 text-blue-600" />
-          </div>
-          <h2 className="text-xl font-semibold text-gray-800">Connect Your Wallet</h2>
-          <p className="text-gray-600">Please connect your wallet to start trading</p>
-        </div>
+        <Card className="max-w-md mx-auto">
+          <CardContent className="text-center space-y-4 p-8">
+            <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto">
+              <User className="w-8 h-8 text-blue-600" />
+            </div>
+            <h2 className="text-xl font-semibold text-gray-800">Connect Your Wallet</h2>
+            <p className="text-gray-600">Please connect your wallet to start trading</p>
+          </CardContent>
+        </Card>
       </div>
     );
   }
@@ -390,7 +393,7 @@ const Trade = () => {
   if (!contractAddress) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 pt-24 pb-20 md:pb-6">
-        <div className="max-w-6xl mx-auto px-4 space-y-8">
+        <div className="max-w-4xl mx-auto px-4 space-y-6">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -403,49 +406,79 @@ const Trade = () => {
             <p className="text-gray-600 text-lg">Discover and trade tokens on the Base network</p>
           </motion.div>
 
+          {/* Balance Display */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="max-w-2xl mx-auto"
+            className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-2xl shadow-lg p-6 text-white max-w-md mx-auto"
           >
-            <div className="bg-white rounded-2xl shadow-xl border border-gray-200 p-6">
-              <TokenSearch onTokenSelect={(address) => navigate(`/trade/${address}`)} />
+            <div className="text-center">
+              <p className="text-blue-100 mb-1">Available Balance</p>
+              <p className="text-3xl font-bold">{profile.fakeUSDCBalance.toFixed(4)} ETH</p>
+              <p className="text-blue-100 text-sm">${(profile.fakeUSDCBalance * 2500).toLocaleString()}</p>
             </div>
           </motion.div>
 
-          {/* Popular tokens or recent trades could go here */}
+          {/* Search */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
+          >
+            <Card className="max-w-2xl mx-auto rounded-2xl shadow-lg">
+              <CardContent className="p-6">
+                <TokenSearch onTokenSelect={(address) => navigate(`/trade/${address}`)} />
+              </CardContent>
+            </Card>
+          </motion.div>
+
+          {/* Info Cards */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
             className="grid md:grid-cols-2 gap-6"
           >
-            <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6">
-              <h3 className="text-lg font-semibold text-gray-800 mb-4">Quick Start</h3>
-              <ul className="space-y-3 text-gray-600">
-                <li className="flex items-center space-x-2">
-                  <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
-                  <span>Search for any Base token</span>
-                </li>
-                <li className="flex items-center space-x-2">
-                  <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
-                  <span>View real-time price charts</span>
-                </li>
-                <li className="flex items-center space-x-2">
-                  <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
-                  <span>Buy and sell with low fees</span>
-                </li>
-              </ul>
-            </div>
+            <Card className="rounded-2xl shadow-lg">
+              <CardContent className="p-6">
+                <h3 className="text-lg font-semibold text-gray-800 mb-4">Quick Start</h3>
+                <ul className="space-y-3 text-gray-600">
+                  <li className="flex items-center space-x-2">
+                    <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
+                    <span>Search for any Base token</span>
+                  </li>
+                  <li className="flex items-center space-x-2">
+                    <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
+                    <span>View real-time price charts</span>
+                  </li>
+                  <li className="flex items-center space-x-2">
+                    <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
+                    <span>Buy and sell with low fees</span>
+                  </li>
+                </ul>
+              </CardContent>
+            </Card>
             
-            <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6">
-              <h3 className="text-lg font-semibold text-gray-800 mb-4">Your Balance</h3>
-              <div className="text-3xl font-bold text-blue-600 mb-2">
-                {profile.fakeUSDCBalance.toFixed(4)} ETH
-              </div>
-              <p className="text-gray-600">Available for trading</p>
-            </div>
+            <Card className="rounded-2xl shadow-lg">
+              <CardContent className="p-6">
+                <h3 className="text-lg font-semibold text-gray-800 mb-4">Portfolio Stats</h3>
+                <div className="space-y-3">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Tokens Owned</span>
+                    <span className="font-semibold">{profile.portfolio.length}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Total Trades</span>
+                    <span className="font-semibold">{profile.tradeHistory.length}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Watchlist</span>
+                    <span className="font-semibold">{profile.watchlist.length}</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </motion.div>
         </div>
       </div>
@@ -455,10 +488,12 @@ const Trade = () => {
   if (isTokenLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 pt-24 pb-20 md:pb-6 flex items-center justify-center">
-        <div className="text-center space-y-4">
-          <div className="animate-spin rounded-full h-12 w-12 border-2 border-blue-600 border-t-transparent mx-auto"></div>
-          <p className="text-gray-600">Loading token data...</p>
-        </div>
+        <Card className="max-w-md mx-auto">
+          <CardContent className="text-center space-y-4 p-8">
+            <div className="animate-spin rounded-full h-12 w-12 border-2 border-blue-600 border-t-transparent mx-auto"></div>
+            <p className="text-gray-600">Loading token data...</p>
+          </CardContent>
+        </Card>
       </div>
     );
   }
@@ -466,16 +501,18 @@ const Trade = () => {
   if (tokenError || !tokenData) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 pt-24 pb-20 md:pb-6 flex items-center justify-center">
-        <div className="text-center space-y-4 p-8 bg-white rounded-2xl shadow-xl border border-gray-200">
-          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto">
-            <AlertCircle className="w-8 h-8 text-red-600" />
-          </div>
-          <h2 className="text-xl font-semibold text-gray-800">Failed to Load Token</h2>
-          <p className="text-gray-600">Unable to fetch token data from DexScreener</p>
-          <Button onClick={() => refetchToken()} className="bg-blue-600 hover:bg-blue-700">
-            Try Again
-          </Button>
-        </div>
+        <Card className="max-w-md mx-auto">
+          <CardContent className="text-center space-y-4 p-8">
+            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto">
+              <AlertCircle className="w-8 h-8 text-red-600" />
+            </div>
+            <h2 className="text-xl font-semibold text-gray-800">Failed to Load Token</h2>
+            <p className="text-gray-600">Unable to fetch token data from DexScreener</p>
+            <Button onClick={() => refetchToken()} className="bg-blue-600 hover:bg-blue-700">
+              Try Again
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     );
   }
@@ -486,11 +523,11 @@ const Trade = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 pt-24 pb-20 md:pb-6">
       <div className="max-w-6xl mx-auto px-4 space-y-6">
-        {/* Header with Search and Quick Trade */}
+        {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex items-center justify-between bg-white rounded-2xl shadow-lg border border-gray-200 p-4"
+          className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
         >
           <Button
             onClick={() => navigate('/trade')}
@@ -501,11 +538,7 @@ const Trade = () => {
             <span>Back to Search</span>
           </Button>
 
-          <div className="flex-1 max-w-md mx-4">
-            <TokenSearch onTokenSelect={(address) => navigate(`/trade/${address}`)} />
-          </div>
-
-          <div className="flex items-center space-x-2">
+          <div className="flex flex-wrap items-center gap-2">
             <Button
               onClick={() => setActiveTab('buy')}
               variant={activeTab === 'buy' ? 'default' : 'outline'}
@@ -558,14 +591,14 @@ const Trade = () => {
           transition={{ delay: 0.05 }}
           className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-2xl shadow-lg p-6 text-white"
         >
-          <div className="flex items-center justify-between">
-            <div>
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="text-center sm:text-left">
               <p className="text-blue-100 mb-1">Your Balance</p>
               <p className="text-3xl font-bold">{profile.fakeUSDCBalance.toFixed(4)} ETH</p>
               <p className="text-blue-100 text-sm">${(profile.fakeUSDCBalance * 2500).toLocaleString()}</p>
             </div>
             {existingToken && (
-              <div className="text-right">
+              <div className="text-center sm:text-right">
                 <p className="text-blue-100 mb-1">Holdings</p>
                 <p className="text-xl font-semibold">
                   {existingToken.amount.toLocaleString()} {tokenData.baseToken.symbol}
@@ -584,9 +617,9 @@ const Trade = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
         >
-          <Card className="backdrop-blur-md bg-white/80 border border-white/20 shadow-xl rounded-2xl">
+          <Card className="bg-white shadow-lg rounded-2xl">
             <CardHeader>
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div className="flex items-center space-x-4">
                   <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center">
                     <span className="text-blue-600 font-bold text-2xl">
@@ -598,12 +631,12 @@ const Trade = () => {
                       {tokenData.baseToken.symbol}
                     </CardTitle>
                     <p className="text-gray-600">{tokenData.baseToken.name}</p>
-                    <p className="text-xs text-gray-500">
+                    <p className="text-xs text-gray-500 font-mono">
                       {tokenData.baseToken.address.slice(0, 6)}...{tokenData.baseToken.address.slice(-4)}
                     </p>
                   </div>
                 </div>
-                <div className="text-right">
+                <div className="text-center sm:text-right">
                   <p className="text-2xl font-bold text-blue-600">
                     ${parseFloat(tokenData.priceUsd).toFixed(8)}
                   </p>
@@ -649,7 +682,7 @@ const Trade = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
           >
-            <Card className="backdrop-blur-md bg-white/80 border border-white/20 shadow-xl rounded-2xl">
+            <Card className="bg-white shadow-lg rounded-2xl">
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-xl font-bold text-gray-800">
@@ -659,7 +692,7 @@ const Trade = () => {
                     variant="outline"
                     size="sm"
                     onClick={() => refetchToken()}
-                    className="min-w-[48px] h-[48px] md:min-w-auto md:h-auto rounded-xl"
+                    className="rounded-xl"
                   >
                     <RefreshCw className="w-4 h-4" />
                   </Button>
@@ -681,7 +714,7 @@ const Trade = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
           >
-            <Card className="backdrop-blur-md bg-white/80 border border-white/20 shadow-xl rounded-2xl">
+            <Card className="bg-white shadow-lg rounded-2xl">
               <CardHeader>
                 <div className="flex space-x-1">
                   <Button
@@ -856,13 +889,13 @@ const Trade = () => {
           </motion.div>
         </div>
 
-        {/* Token Stats */}
+        {/* Trading Statistics */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
         >
-          <Card className="backdrop-blur-md bg-white/80 border border-white/20 shadow-xl rounded-2xl">
+          <Card className="bg-white shadow-lg rounded-2xl">
             <CardHeader>
               <CardTitle className="text-xl font-bold text-gray-800">
                 Trading Statistics
