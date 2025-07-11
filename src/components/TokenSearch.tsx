@@ -39,14 +39,58 @@ const searchTokens = async (query: string): Promise<SearchResult[]> => {
   if (!query || query.length < 2) return [];
   
   try {
-    const response = await fetch(`https://api.dexscreener.com/latest/dex/search/?q=${encodeURIComponent(query)}`);
-    const data = await response.json();
-    
-    if (data.pairs) {
-      // Filter for Base chain tokens only
-      return data.pairs.filter((pair: SearchResult) => pair.chainId === 'base').slice(0, 10);
+    // If query looks like a contract address, search for that specific address
+    if (query.startsWith('0x') && query.length === 42) {
+      const response = await fetch(`https://api.dexscreener.com/latest/dex/tokens/${query}`);
+      const data = await response.json();
+      
+      if (data.pairs) {
+        // Filter for Base chain tokens and ensure the base token matches the searched address
+        return data.pairs
+          .filter((pair: SearchResult) => 
+            pair.chainId === 'base' && 
+            pair.baseToken.address.toLowerCase() === query.toLowerCase()
+          )
+          .slice(0, 5);
+      }
+      return [];
+    } else {
+      // Search by symbol/name
+      const response = await fetch(`https://api.dexscreener.com/latest/dex/search/?q=${encodeURIComponent(query)}`);
+      const data = await response.json();
+      
+      if (data.pairs) {
+        // Filter for Base chain tokens and prioritize exact matches
+        const basePairs = data.pairs.filter((pair: SearchResult) => pair.chainId === 'base');
+        
+        // Sort by relevance: exact symbol matches first, then name matches, then partial matches
+        const sortedPairs = basePairs.sort((a: SearchResult, b: SearchResult) => {
+          const queryLower = query.toLowerCase();
+          const aSymbol = a.baseToken.symbol.toLowerCase();
+          const bSymbol = b.baseToken.symbol.toLowerCase();
+          const aName = a.baseToken.name.toLowerCase();
+          const bName = b.baseToken.name.toLowerCase();
+          
+          // Exact symbol match gets highest priority
+          if (aSymbol === queryLower && bSymbol !== queryLower) return -1;
+          if (bSymbol === queryLower && aSymbol !== queryLower) return 1;
+          
+          // Symbol starts with query
+          if (aSymbol.startsWith(queryLower) && !bSymbol.startsWith(queryLower)) return -1;
+          if (bSymbol.startsWith(queryLower) && !aSymbol.startsWith(queryLower)) return 1;
+          
+          // Name starts with query
+          if (aName.startsWith(queryLower) && !bName.startsWith(queryLower)) return -1;
+          if (bName.startsWith(queryLower) && !aName.startsWith(queryLower)) return 1;
+          
+          // Sort by liquidity (higher liquidity first)
+          return (b.liquidity?.usd || 0) - (a.liquidity?.usd || 0);
+        });
+        
+        return sortedPairs.slice(0, 10);
+      }
+      return [];
     }
-    return [];
   } catch (error) {
     console.error('Error searching tokens:', error);
     return [];
@@ -88,7 +132,7 @@ export const TokenSearch = ({ onTokenSelect }: TokenSearchProps) => {
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
         <Input
           type="text"
-          placeholder="Search tokens by name, symbol, or address..."
+          placeholder="Search tokens by name, symbol, or contract address..."
           value={searchQuery}
           onChange={handleInputChange}
           onFocus={handleInputFocus}
@@ -130,6 +174,9 @@ export const TokenSearch = ({ onTokenSelect }: TokenSearchProps) => {
                         <div className="text-sm text-gray-600 truncate">
                           {result.baseToken.name}
                         </div>
+                        <div className="text-xs text-gray-400 truncate">
+                          {result.baseToken.address}
+                        </div>
                       </div>
                       <div className="text-right">
                         <div className="font-semibold text-blue-600">
@@ -137,6 +184,9 @@ export const TokenSearch = ({ onTokenSelect }: TokenSearchProps) => {
                         </div>
                         <div className={`text-sm ${result.priceChange?.h24 >= 0 ? 'text-green-600' : 'text-red-500'}`}>
                           {result.priceChange?.h24 ? `${result.priceChange.h24 >= 0 ? '+' : ''}${result.priceChange.h24.toFixed(2)}%` : 'N/A'}
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          ${result.liquidity?.usd ? (result.liquidity.usd / 1000).toFixed(1) + 'K' : 'N/A'} Liq
                         </div>
                       </div>
                     </div>

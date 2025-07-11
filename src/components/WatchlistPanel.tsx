@@ -19,32 +19,97 @@ interface WatchlistToken {
   change24h: number;
 }
 
+const fetchTokenData = async (address: string): Promise<WatchlistToken | null> => {
+  try {
+    // First try to get cached token data from localStorage
+    const cachedTokens = localStorage.getItem('tokenCache');
+    if (cachedTokens) {
+      const cache = JSON.parse(cachedTokens);
+      const cachedToken = cache[address];
+      if (cachedToken) {
+        return {
+          contractAddress: address,
+          symbol: cachedToken.symbol || 'UNKNOWN',
+          name: cachedToken.name || 'Unknown Token',
+          price: cachedToken.price || 0.000001,
+          change24h: cachedToken.change24h || 0
+        };
+      }
+    }
+
+    // Try to fetch from DexScreener API
+    const response = await fetch(`https://api.dexscreener.com/latest/dex/tokens/${address}`);
+    const data = await response.json();
+    
+    if (data.pairs && data.pairs.length > 0) {
+      // Find Base chain pair or use the first one
+      const basePair = data.pairs.find((pair: any) => pair.chainId === 'base') || data.pairs[0];
+      
+      const tokenData = {
+        contractAddress: address,
+        symbol: basePair.baseToken.symbol,
+        name: basePair.baseToken.name,
+        price: parseFloat(basePair.priceUsd || '0'),
+        change24h: basePair.priceChange?.h24 || 0
+      };
+
+      // Cache the token data
+      const existingCache = JSON.parse(localStorage.getItem('tokenCache') || '{}');
+      existingCache[address] = tokenData;
+      localStorage.setItem('tokenCache', JSON.stringify(existingCache));
+
+      return tokenData;
+    }
+    
+    return null;
+  } catch (error) {
+    console.error('Error fetching token data:', error);
+    return null;
+  }
+};
+
 export const WatchlistPanel = ({ watchlist, onRemove, onTrade }: WatchlistPanelProps) => {
   const [tokens, setTokens] = useState<WatchlistToken[]>([]);
+  const [loading, setLoading] = useState(false);
 
-  // Simulate fetching watchlist token data
   useEffect(() => {
-    console.log('Watchlist updated:', watchlist);
-    
-    const mockTokens = watchlist.map((address, index) => {
-      // Create more consistent mock data based on address
-      const addressSeed = parseInt(address.slice(-4), 16) || index;
-      const symbols = ['PEPE', 'DOGE', 'SHIB', 'BONK', 'WIF', 'FLOKI', 'MEME', 'WOJAK'];
-      const names = ['Pepe Token', 'Dogecoin', 'Shiba Inu', 'Bonk Token', 'Dogwifhat', 'Floki', 'Meme Token', 'Wojak Token'];
+    const loadTokenData = async () => {
+      if (watchlist.length === 0) {
+        setTokens([]);
+        return;
+      }
+
+      setLoading(true);
+      console.log('Loading token data for watchlist:', watchlist);
       
-      const symbolIndex = addressSeed % symbols.length;
-      
-      return {
-        contractAddress: address,
-        symbol: symbols[symbolIndex],
-        name: names[symbolIndex],
-        price: (addressSeed % 100) / 1000000 + 0.000001, // Generate consistent price based on address
-        change24h: ((addressSeed % 50) - 25) / 2 // Generate change between -12.5% and +12.5%
-      };
-    });
-    
-    setTokens(mockTokens);
-    console.log('Mock tokens generated:', mockTokens);
+      const tokenPromises = watchlist.map(async (address) => {
+        const tokenData = await fetchTokenData(address);
+        if (tokenData) {
+          return tokenData;
+        }
+        
+        // Fallback to generic data if API fails
+        return {
+          contractAddress: address,
+          symbol: 'UNKNOWN',
+          name: 'Unknown Token',
+          price: 0.000001,
+          change24h: 0
+        };
+      });
+
+      try {
+        const tokenResults = await Promise.all(tokenPromises);
+        setTokens(tokenResults);
+        console.log('Loaded token data:', tokenResults);
+      } catch (error) {
+        console.error('Error loading token data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadTokenData();
   }, [watchlist]);
 
   if (watchlist.length === 0) {
@@ -54,6 +119,14 @@ export const WatchlistPanel = ({ watchlist, onRemove, onTrade }: WatchlistPanelP
         <p className="text-sm text-gray-400">
           Add tokens to your watchlist from the trading pages
         </p>
+      </div>
+    );
+  }
+
+  if (loading) {
+    return (
+      <div className="text-center py-8">
+        <p className="text-gray-500">Loading watchlist tokens...</p>
       </div>
     );
   }

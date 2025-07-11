@@ -163,7 +163,7 @@ const Portfolio = () => {
                 <div className="text-center py-12">
                   <p className="text-gray-500 mb-4">No tokens in your portfolio yet</p>
                   <Button
-                    onClick={() => navigate('/trade/0x0000000000000000000000000000000000000000')}
+                    onClick={() => navigate('/trade')}
                     className="bg-blue-600 hover:bg-blue-700 text-white"
                   >
                     Start Trading
