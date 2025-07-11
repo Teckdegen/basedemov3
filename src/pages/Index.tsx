@@ -39,7 +39,7 @@ const Index = () => {
             <h1 className="text-3xl md:text-4xl font-bold text-gray-800">Base Demo</h1>
           </div>
           <p className="text-lg md:text-xl text-gray-600 max-w-2xl mx-auto">
-            Practice cryptocurrency trading risk-free with 1,500 fake USDC on Base blockchain
+            Practice cryptocurrency trading risk-free with 1,500 Demo USDC on Base blockchain
           </p>
 
           {/* Balance Display for Connected Users */}
@@ -107,7 +107,7 @@ const Index = () => {
                 <TrendingUp className="w-8 h-8 text-blue-600" />
               </div>
               <h3 className="text-xl font-semibold text-gray-800 mb-2">Risk-Free Trading</h3>
-              <p className="text-gray-600">Trade without risk using fake USDC on Base chain</p>
+              <p className="text-gray-600">Trade without risk using Demo USDC on Base chain</p>
             </CardContent>
           </Card>
 
@@ -127,7 +127,7 @@ const Index = () => {
                 <Lock className="w-8 h-8 text-green-600" />
               </div>
               <h3 className="text-xl font-semibold text-gray-800 mb-2">Secure Storage</h3>
-              <p className="text-gray-600">Data stored locally with multiple wallet support</p>
+              <p className="text-gray-600">Data stored offchain with multiple wallet support</p>
             </CardContent>
           </Card>
         </motion.div>
