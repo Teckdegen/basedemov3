@@ -24,14 +24,27 @@ export const WatchlistPanel = ({ watchlist, onRemove, onTrade }: WatchlistPanelP
 
   // Simulate fetching watchlist token data
   useEffect(() => {
-    const mockTokens = watchlist.map(address => ({
-      contractAddress: address,
-      symbol: ['PEPE', 'DOGE', 'SHIB', 'BONK', 'WIF'][Math.floor(Math.random() * 5)],
-      name: 'Mock Token',
-      price: Math.random() * 0.1,
-      change24h: (Math.random() - 0.5) * 10
-    }));
+    console.log('Watchlist updated:', watchlist);
+    
+    const mockTokens = watchlist.map((address, index) => {
+      // Create more consistent mock data based on address
+      const addressSeed = parseInt(address.slice(-4), 16) || index;
+      const symbols = ['PEPE', 'DOGE', 'SHIB', 'BONK', 'WIF', 'FLOKI', 'MEME', 'WOJAK'];
+      const names = ['Pepe Token', 'Dogecoin', 'Shiba Inu', 'Bonk Token', 'Dogwifhat', 'Floki', 'Meme Token', 'Wojak Token'];
+      
+      const symbolIndex = addressSeed % symbols.length;
+      
+      return {
+        contractAddress: address,
+        symbol: symbols[symbolIndex],
+        name: names[symbolIndex],
+        price: (addressSeed % 100) / 1000000 + 0.000001, // Generate consistent price based on address
+        change24h: ((addressSeed % 50) - 25) / 2 // Generate change between -12.5% and +12.5%
+      };
+    });
+    
     setTokens(mockTokens);
+    console.log('Mock tokens generated:', mockTokens);
   }, [watchlist]);
 
   if (watchlist.length === 0) {
@@ -66,6 +79,9 @@ export const WatchlistPanel = ({ watchlist, onRemove, onTrade }: WatchlistPanelP
                   <div>
                     <h4 className="font-semibold text-gray-800">{token.symbol}</h4>
                     <p className="text-sm text-gray-600">${token.price.toFixed(6)}</p>
+                    <p className="text-xs text-gray-400 truncate max-w-32">
+                      {token.contractAddress}
+                    </p>
                   </div>
                 </div>
 
@@ -81,14 +97,20 @@ export const WatchlistPanel = ({ watchlist, onRemove, onTrade }: WatchlistPanelP
 
                   <div className="flex space-x-2">
                     <Button
-                      onClick={() => onTrade(token.contractAddress)}
+                      onClick={() => {
+                        console.log('Trading token:', token.contractAddress);
+                        onTrade(token.contractAddress);
+                      }}
                       size="sm"
                       className="bg-blue-600 hover:bg-blue-700 text-white min-w-[48px] h-[48px] md:min-w-auto md:h-auto"
                     >
                       Trade
                     </Button>
                     <Button
-                      onClick={() => onRemove(token.contractAddress)}
+                      onClick={() => {
+                        console.log('Removing from watchlist:', token.contractAddress);
+                        onRemove(token.contractAddress);
+                      }}
                       size="sm"
                       variant="outline"
                       className="border-red-500 text-red-500 hover:bg-red-500 hover:text-white min-w-[48px] h-[48px] md:min-w-auto md:h-auto"

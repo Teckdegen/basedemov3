@@ -1,4 +1,3 @@
-
 import { useState, useEffect, createContext, useContext, ReactNode } from 'react';
 import { useAccount, useDisconnect } from 'wagmi';
 import { useToast } from '@/hooks/use-toast';
@@ -136,11 +135,16 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
   // Load profile from localStorage on mount
   useEffect(() => {
     const loadProfile = () => {
+      console.log('Loading profile on mount...');
+      
+      // Check if there's a last connected wallet
       const lastConnectedWallet = localStorage.getItem('lastConnectedWallet');
+      console.log('Last connected wallet:', lastConnectedWallet);
       
       if (lastConnectedWallet) {
         const profileKey = `baseDemoProfile_${lastConnectedWallet}`;
         const existingProfile = localStorage.getItem(profileKey);
+        console.log('Existing profile found:', !!existingProfile);
         
         if (existingProfile) {
           try {
@@ -148,7 +152,11 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
             // Validate profile structure
             if (userProfile.walletAddress && typeof userProfile.fakeUSDCBalance === 'number') {
               setProfile(userProfile);
-              console.log('Profile loaded from localStorage:', userProfile);
+              console.log('Profile loaded successfully:', userProfile.walletAddress);
+            } else {
+              console.log('Invalid profile structure, removing...');
+              localStorage.removeItem(profileKey);
+              localStorage.removeItem('lastConnectedWallet');
             }
           } catch (error) {
             console.error('Error parsing profile:', error);
@@ -167,6 +175,8 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
 
   const connect = (address: string) => {
     try {
+      console.log('Connecting wallet:', address);
+      
       // Validate address format
       if (!address.startsWith('0x') || address.length !== 42) {
         throw new Error('Invalid wallet address format');
@@ -174,6 +184,7 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
 
       const profileKey = `baseDemoProfile_${address}`;
       const existingProfile = localStorage.getItem(profileKey);
+      console.log('Existing profile for address:', !!existingProfile);
       
       let userProfile: WalletProfile;
       
@@ -184,9 +195,14 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
           if (!userProfile.walletAddress || userProfile.fakeUSDCBalance < 0) {
             throw new Error('Corrupted profile data');
           }
-          console.log('Existing profile loaded:', userProfile);
+          console.log('Existing profile loaded successfully');
+          toast({
+            title: "Welcome Back!",
+            description: `Restored wallet with $${userProfile.fakeUSDCBalance.toFixed(2)} USDC`,
+          });
         } catch (error) {
           // If profile is corrupted, create new one
+          console.log('Profile corrupted, creating new one');
           userProfile = createNewProfile(address);
           toast({
             title: "Profile Reset",
@@ -196,6 +212,7 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
         }
       } else {
         // Create new profile
+        console.log('Creating new profile');
         userProfile = createNewProfile(address);
         toast({
           title: "Welcome to Base Wallet!",
@@ -208,12 +225,7 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
       localStorage.setItem('lastConnectedWallet', address);
 
       setProfile(userProfile);
-      console.log('Profile connected and saved:', userProfile);
-
-      toast({
-        title: "Wallet Connected",
-        description: `Connected to ${address.slice(0, 6)}...${address.slice(-4)}`,
-      });
+      console.log('Profile connected and saved');
 
     } catch (error) {
       console.error('Connection error:', error);
@@ -226,9 +238,11 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const disconnect = () => {
+    console.log('Disconnecting wallet...');
     wagmiDisconnect();
+    
+    // Don't clear localStorage here - keep the profile data for reconnection
     setProfile(null);
-    localStorage.removeItem('lastConnectedWallet');
     
     toast({
       title: "Wallet Disconnected",
@@ -247,43 +261,30 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
       return;
     }
 
+    console.log('Updating profile with:', updates);
     const updatedProfile = { ...profile, ...updates };
     setProfile(updatedProfile);
     
     const profileKey = `baseDemoProfile_${address}`;
     localStorage.setItem(profileKey, JSON.stringify(updatedProfile));
     
-    console.log('Profile updated and saved:', updatedProfile);
+    console.log('Profile updated and saved');
   };
 
   // Watch for account changes from RainbowKit
   useEffect(() => {
     if (isConnected && address && !isLoading) {
-      connect(address);
-    } else if (!isConnected && !isLoading) {
+      console.log('Account connected via RainbowKit:', address);
+      
+      // Check if we already have this profile loaded
+      if (!profile || profile.walletAddress !== address) {
+        connect(address);
+      }
+    } else if (!isConnected && !isLoading && profile) {
+      console.log('Account disconnected via RainbowKit');
       setProfile(null);
     }
   }, [isConnected, address, isLoading]);
-
-  // Auto-reconnect on page load if wallet was previously connected
-  useEffect(() => {
-    if (!isLoading && !isConnected && !profile) {
-      const lastConnectedWallet = localStorage.getItem('lastConnectedWallet');
-      if (lastConnectedWallet) {
-        // Don't auto-connect, just load the profile data for display
-        const profileKey = `baseDemoProfile_${lastConnectedWallet}`;
-        const existingProfile = localStorage.getItem(profileKey);
-        if (existingProfile) {
-          try {
-            const userProfile = JSON.parse(existingProfile);
-            console.log('Profile data available but wallet not connected');
-          } catch (error) {
-            console.error('Error loading cached profile:', error);
-          }
-        }
-      }
-    }
-  }, [isLoading, isConnected, profile]);
 
   return (
     <WalletContext.Provider value={{

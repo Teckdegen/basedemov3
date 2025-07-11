@@ -39,6 +39,21 @@ const Portfolio = () => {
     return pnl < worstPnl ? token : worst;
   }, null);
 
+  const handleRemoveFromWatchlist = (contractAddress: string) => {
+    console.log('Removing from watchlist:', contractAddress);
+    const updatedWatchlist = profile.watchlist.filter(addr => addr !== contractAddress);
+    console.log('New watchlist:', updatedWatchlist);
+    
+    updateProfile({
+      watchlist: updatedWatchlist
+    });
+  };
+
+  const handleTradeFromWatchlist = (contractAddress: string) => {
+    console.log('Trading from watchlist:', contractAddress);
+    navigate(`/trade/${contractAddress}`);
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 pt-32 pb-20 md:pb-6">
       <div className="max-w-7xl mx-auto px-4 space-y-6">
@@ -201,12 +216,8 @@ const Portfolio = () => {
               <CardContent>
                 <WatchlistPanel 
                   watchlist={profile.watchlist}
-                  onRemove={(contractAddress) => {
-                    updateProfile({
-                      watchlist: profile.watchlist.filter(addr => addr !== contractAddress)
-                    });
-                  }}
-                  onTrade={(contractAddress) => navigate(`/trade/${contractAddress}`)}
+                  onRemove={handleRemoveFromWatchlist}
+                  onTrade={handleTradeFromWatchlist}
                 />
               </CardContent>
             )}
