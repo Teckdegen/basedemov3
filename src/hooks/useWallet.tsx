@@ -137,32 +137,31 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
     const loadProfile = () => {
       console.log('Loading profile on mount...');
       
-      // Check if there's a last connected wallet
-      const lastConnectedWallet = localStorage.getItem('lastConnectedWallet');
-      console.log('Last connected wallet:', lastConnectedWallet);
+      // Only load if wallet is actually connected
+      if (!isConnected || !address) {
+        console.log('No wallet connected, skipping profile load');
+        setIsLoading(false);
+        return;
+      }
       
-      if (lastConnectedWallet) {
-        const profileKey = `baseDemoProfile_${lastConnectedWallet}`;
-        const existingProfile = localStorage.getItem(profileKey);
-        console.log('Existing profile found:', !!existingProfile);
-        
-        if (existingProfile) {
-          try {
-            const userProfile = JSON.parse(existingProfile);
-            // Validate profile structure
-            if (userProfile.walletAddress && typeof userProfile.fakeUSDCBalance === 'number') {
-              setProfile(userProfile);
-              console.log('Profile loaded successfully:', userProfile.walletAddress);
-            } else {
-              console.log('Invalid profile structure, removing...');
-              localStorage.removeItem(profileKey);
-              localStorage.removeItem('lastConnectedWallet');
-            }
-          } catch (error) {
-            console.error('Error parsing profile:', error);
+      const profileKey = `baseDemoProfile_${address}`;
+      const existingProfile = localStorage.getItem(profileKey);
+      console.log('Existing profile found for connected wallet:', !!existingProfile);
+      
+      if (existingProfile) {
+        try {
+          const userProfile = JSON.parse(existingProfile);
+          // Validate profile structure
+          if (userProfile.walletAddress && typeof userProfile.fakeUSDCBalance === 'number') {
+            setProfile(userProfile);
+            console.log('Profile loaded successfully:', userProfile.walletAddress);
+          } else {
+            console.log('Invalid profile structure, removing...');
             localStorage.removeItem(profileKey);
-            localStorage.removeItem('lastConnectedWallet');
           }
+        } catch (error) {
+          console.error('Error parsing profile:', error);
+          localStorage.removeItem(profileKey);
         }
       }
       setIsLoading(false);
@@ -171,7 +170,7 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
     // Small delay to ensure React has mounted
     const timer = setTimeout(loadProfile, 100);
     return () => clearTimeout(timer);
-  }, []);
+  }, [isConnected, address]);
 
   const connect = (address: string) => {
     try {
@@ -239,10 +238,15 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
 
   const disconnect = () => {
     console.log('Disconnecting wallet...');
+    
+    // Disconnect from wagmi
     wagmiDisconnect();
     
-    // Don't clear localStorage here - keep the profile data for reconnection
+    // Clear the profile state but keep localStorage data for reconnection
     setProfile(null);
+    
+    // Remove the last connected wallet reference so it doesn't auto-load
+    localStorage.removeItem('lastConnectedWallet');
     
     toast({
       title: "Wallet Disconnected",
@@ -283,6 +287,7 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
     } else if (!isConnected && !isLoading && profile) {
       console.log('Account disconnected via RainbowKit');
       setProfile(null);
+      localStorage.removeItem('lastConnectedWallet');
     }
   }, [isConnected, address, isLoading]);
 
