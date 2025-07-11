@@ -98,7 +98,7 @@ export const PortfolioChart = ({ data }: PortfolioChartProps) => {
         color: '#1F2937',
         font: {
           size: 18,
-          weight: 'bold',
+          weight: 'bold' as const,
           family: 'Inter, system-ui, sans-serif'
         },
         padding: {
@@ -116,7 +116,7 @@ export const PortfolioChart = ({ data }: PortfolioChartProps) => {
         displayColors: false,
         titleFont: {
           size: 15,
-          weight: 'bold',
+          weight: 'bold' as const,
           family: 'Inter, system-ui, sans-serif'
         },
         bodyFont: {
@@ -166,7 +166,7 @@ export const PortfolioChart = ({ data }: PortfolioChartProps) => {
           color: '#6B7280',
           font: {
             size: 13,
-            weight: 'bold',
+            weight: 'bold' as const,
             family: 'Inter, system-ui, sans-serif'
           },
           padding: 15
@@ -195,7 +195,7 @@ export const PortfolioChart = ({ data }: PortfolioChartProps) => {
           color: '#6B7280',
           font: {
             size: 13,
-            weight: 'bold',
+            weight: 'bold' as const,
             family: 'Inter, system-ui, sans-serif'
           },
           padding: 15
@@ -209,7 +209,6 @@ export const PortfolioChart = ({ data }: PortfolioChartProps) => {
     hover: {
       mode: 'index' as const,
       intersect: false,
-      animationDuration: 300,
     },
     elements: {
       line: {
@@ -223,8 +222,7 @@ export const PortfolioChart = ({ data }: PortfolioChartProps) => {
     },
     animation: {
       duration: 2000,
-      easing: 'easeInOutCubic',
-      delay: (context: any) => context.dataIndex * 100,
+      easing: 'easeInOutCubic' as const,
     },
   };
 

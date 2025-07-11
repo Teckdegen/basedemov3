@@ -149,7 +149,7 @@ export const PnLChart = ({ portfolio, portfolioHistory, usdcBalance }: PnLChartP
         labels: {
           padding: 20,
           usePointStyle: true,
-          pointStyle: 'circle',
+          pointStyle: 'circle' as const,
           font: {
             size: 12,
             family: 'Inter, system-ui, sans-serif'
@@ -184,7 +184,7 @@ export const PnLChart = ({ portfolio, portfolioHistory, usdcBalance }: PnLChartP
         cornerRadius: 12,
         titleFont: {
           size: 14,
-          weight: 'bold',
+          weight: 'bold' as const,
           family: 'Inter, system-ui, sans-serif'
         },
         bodyFont: {
@@ -206,7 +206,7 @@ export const PnLChart = ({ portfolio, portfolioHistory, usdcBalance }: PnLChartP
       animateRotate: true,
       animateScale: true,
       duration: 2000,
-      easing: 'easeInOutCubic'
+      easing: 'easeInOutCubic' as const
     }
   };
 
@@ -226,7 +226,7 @@ export const PnLChart = ({ portfolio, portfolioHistory, usdcBalance }: PnLChartP
         cornerRadius: 12,
         titleFont: {
           size: 14,
-          weight: 'bold',
+          weight: 'bold' as const,
           family: 'Inter, system-ui, sans-serif'
         },
         bodyFont: {
@@ -274,8 +274,7 @@ export const PnLChart = ({ portfolio, portfolioHistory, usdcBalance }: PnLChartP
     },
     animation: {
       duration: 2000,
-      easing: 'easeInOutCubic',
-      delay: (context: any) => context.dataIndex * 200,
+      easing: 'easeInOutCubic' as const,
     }
   };
 
@@ -295,7 +294,7 @@ export const PnLChart = ({ portfolio, portfolioHistory, usdcBalance }: PnLChartP
         cornerRadius: 12,
         titleFont: {
           size: 14,
-          weight: 'bold',
+          weight: 'bold' as const,
           family: 'Inter, system-ui, sans-serif'
         },
         bodyFont: {
@@ -341,7 +340,7 @@ export const PnLChart = ({ portfolio, portfolioHistory, usdcBalance }: PnLChartP
     },
     animation: {
       duration: 2000,
-      easing: 'easeInOutCubic',
+      easing: 'easeInOutCubic' as const,
     }
   };
 

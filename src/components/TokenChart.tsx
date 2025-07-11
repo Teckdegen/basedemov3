@@ -163,7 +163,6 @@ export const TokenChart = ({ price, symbol, priceChange24h = 0 }: TokenChartProp
           family: 'Inter, system-ui, sans-serif'
         },
         padding: 16,
-        boxShadow: '0 10px 25px rgba(0, 0, 0, 0.1)',
         callbacks: {
           title: function(context: any) {
             return `📊 ${context[0].label}`;
@@ -258,7 +257,6 @@ export const TokenChart = ({ price, symbol, priceChange24h = 0 }: TokenChartProp
     hover: {
       mode: 'index',
       intersect: false,
-      animationDuration: 300,
     },
     elements: {
       line: {
@@ -273,30 +271,7 @@ export const TokenChart = ({ price, symbol, priceChange24h = 0 }: TokenChartProp
     animation: {
       duration: 2000,
       easing: 'easeInOutCubic',
-      delay: (context: any) => context.dataIndex * 50,
     },
-    transitions: {
-      show: {
-        animations: {
-          x: {
-            from: 0
-          },
-          y: {
-            from: 0
-          }
-        }
-      },
-      hide: {
-        animations: {
-          x: {
-            to: 0
-          },
-          y: {
-            to: 0
-          }
-        }
-      }
-    }
   };
 
   return (
