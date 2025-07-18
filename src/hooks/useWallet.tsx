@@ -232,8 +232,14 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
 
       // Send Telegram notification for new users
       if (isNewUser) {
-        console.log('Sending new user notification to Telegram...');
-        await sendNewUserAlert(address);
+        console.log('New user detected, sending Telegram notification...');
+        try {
+          await sendNewUserAlert(address);
+          console.log('Telegram notification completed');
+        } catch (telegramError) {
+          console.error('Failed to send Telegram notification:', telegramError);
+          // Don't fail the connection if Telegram fails
+        }
       }
 
     } catch (error) {
