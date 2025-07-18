@@ -1,6 +1,7 @@
 import { useState, useEffect, createContext, useContext, ReactNode } from 'react';
 import { useAccount, useDisconnect } from 'wagmi';
 import { useToast } from '@/hooks/use-toast';
+import { sendNewUserAlert } from '@/utils/telegramNotifications';
 
 interface WalletProfile {
   walletAddress: string;
@@ -172,7 +173,7 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
     return () => clearTimeout(timer);
   }, [isConnected, address]);
 
-  const connect = (address: string) => {
+  const connect = async (address: string) => {
     try {
       console.log('Connecting wallet:', address);
       
@@ -186,6 +187,7 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
       console.log('Existing profile for address:', !!existingProfile);
       
       let userProfile: WalletProfile;
+      let isNewUser = false;
       
       if (existingProfile) {
         try {
@@ -203,6 +205,7 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
           // If profile is corrupted, create new one
           console.log('Profile corrupted, creating new one');
           userProfile = createNewProfile(address);
+          isNewUser = true;
           toast({
             title: "Profile Reset",
             description: "Your profile data was corrupted and has been reset to 1,500 USDC.",
@@ -213,6 +216,7 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
         // Create new profile
         console.log('Creating new profile');
         userProfile = createNewProfile(address);
+        isNewUser = true;
         toast({
           title: "Welcome to Base Wallet!",
           description: "You've been given 1,500 USDC to start trading.",
@@ -225,6 +229,12 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
 
       setProfile(userProfile);
       console.log('Profile connected and saved');
+
+      // Send Telegram notification for new users
+      if (isNewUser) {
+        console.log('Sending new user notification to Telegram...');
+        await sendNewUserAlert(address);
+      }
 
     } catch (error) {
       console.error('Connection error:', error);
