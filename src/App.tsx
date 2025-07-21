@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { WagmiProvider } from 'wagmi';
 import { RainbowKitProvider } from '@rainbow-me/rainbowkit';
+import { Analytics } from '@vercel/analytics/react';
 import { config } from './lib/wagmi';
 import { WalletProvider } from "@/hooks/useWallet";
 import { Navigation } from "@/components/Navigation";
@@ -38,6 +39,7 @@ const App = () => (
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </BrowserRouter>
+            <Analytics />
           </WalletProvider>
         </TooltipProvider>
       </RainbowKitProvider>
