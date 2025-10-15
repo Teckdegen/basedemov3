@@ -375,7 +375,7 @@ const Trade = () => {
 
   if (!profile) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 pt-24 pb-20 md:pb-6 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 pt-24 pb-20 md:pb-6 flex items-center justify-center">
         <Card className="max-w-md mx-auto">
           <CardContent className="text-center space-y-4 p-8">
             <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto">
@@ -392,14 +392,14 @@ const Trade = () => {
   // If no contract address, show search interface
   if (!contractAddress) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 pt-24 pb-20 md:pb-6">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 pt-24 pb-20 md:pb-6">
         <div className="max-w-4xl mx-auto px-4 space-y-6">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             className="text-center space-y-6"
           >
-            <div className="inline-flex items-center space-x-3 px-6 py-3 bg-white rounded-2xl shadow-lg border border-gray-200">
+            <div className="inline-flex items-center space-x-3 px-6 py-3 bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-gray-200/50">
               <ArrowLeftRight className="w-6 h-6 text-blue-600" />
               <h1 className="text-3xl font-bold text-gray-800">Trade Tokens</h1>
             </div>
@@ -521,7 +521,7 @@ const Trade = () => {
   const isPositive = tokenData.priceChange.h24 >= 0;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 pt-24 pb-20 md:pb-6">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 pt-24 pb-20 md:pb-6">
       <div className="max-w-6xl mx-auto px-4 space-y-6">
         {/* Header */}
         <motion.div

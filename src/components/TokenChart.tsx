@@ -275,8 +275,26 @@ export const TokenChart = ({ price, symbol, priceChange24h = 0 }: TokenChartProp
   };
 
   return (
-    <div className="w-full h-80 md:h-96 p-6 bg-gradient-to-br from-gray-50 to-white rounded-2xl shadow-lg">
-      <Line ref={chartRef} data={chartData} options={options} />
+    <div className="w-full h-80 md:h-96 p-6 bg-gradient-to-br from-gray-50 to-white rounded-2xl shadow-lg relative overflow-hidden">
+      {/* Background Pattern */}
+      <div className="absolute inset-0 opacity-5">
+        <div className="absolute inset-0" style={{
+          backgroundImage: `radial-gradient(circle at 1px 1px, rgba(0,0,0,0.15) 1px, transparent 0)`,
+          backgroundSize: '20px 20px'
+        }}></div>
+      </div>
+      
+      <div className="relative z-10">
+        <Line ref={chartRef} data={chartData} options={options} />
+      </div>
+      
+      {/* Price Overlay */}
+      <div className="absolute top-4 right-4 bg-white/80 backdrop-blur-sm rounded-lg px-3 py-2 shadow-sm">
+        <div className="text-sm text-gray-600">Current Price</div>
+        <div className="text-lg font-bold text-gray-800">
+          ${price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 8 })}
+        </div>
+      </div>
     </div>
   );
 };

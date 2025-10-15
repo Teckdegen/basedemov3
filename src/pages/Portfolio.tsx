@@ -55,7 +55,7 @@ const Portfolio = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-32 pb-20 md:pb-6">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 pt-32 pb-20 md:pb-6">
       <div className="max-w-7xl mx-auto px-4 space-y-6">
         {/* Header */}
         <motion.div
@@ -86,7 +86,7 @@ const Portfolio = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
         >
-          <Card className="backdrop-blur-md bg-white/80 border border-white/20 shadow-xl">
+          <Card className="backdrop-blur-sm bg-white/80 border border-gray-200/50 shadow-xl">
             <CardHeader>
               <CardTitle className="text-xl font-bold text-gray-800">
                 Portfolio Performance
@@ -108,7 +108,7 @@ const Portfolio = () => {
           >
             {bestPerformer && (
               <Card 
-                className="backdrop-blur-md bg-green-50/80 border border-green-200 shadow-lg cursor-pointer hover:scale-105 transition-all duration-200"
+                className="backdrop-blur-sm bg-green-50/80 border border-green-200/50 shadow-lg cursor-pointer hover:scale-105 transition-all duration-200"
                 onClick={() => navigate(`/trade/${bestPerformer.contractAddress}`)}
               >
                 <CardContent className="p-4">
@@ -127,7 +127,7 @@ const Portfolio = () => {
 
             {worstPerformer && (
               <Card 
-                className="backdrop-blur-md bg-red-50/80 border border-red-200 shadow-lg cursor-pointer hover:scale-105 transition-all duration-200"
+                className="backdrop-blur-sm bg-red-50/80 border border-red-200/50 shadow-lg cursor-pointer hover:scale-105 transition-all duration-200"
                 onClick={() => navigate(`/trade/${worstPerformer.contractAddress}`)}
               >
                 <CardContent className="p-4">
@@ -152,7 +152,7 @@ const Portfolio = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
         >
-          <Card className="backdrop-blur-md bg-white/80 border border-white/20 shadow-xl">
+          <Card className="backdrop-blur-sm bg-white/80 border border-gray-200/50 shadow-xl">
             <CardHeader>
               <CardTitle className="text-xl font-bold text-gray-800">
                 Token Holdings ({profile.portfolio.length})
@@ -196,7 +196,7 @@ const Portfolio = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
         >
-          <Card className="backdrop-blur-md bg-white/80 border border-white/20 shadow-xl">
+          <Card className="backdrop-blur-sm bg-white/80 border border-gray-200/50 shadow-xl">
             <CardHeader>
               <div className="flex items-center justify-between">
                 <CardTitle className="text-xl font-bold text-gray-800">
@@ -230,7 +230,7 @@ const Portfolio = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5 }}
         >
-          <Card className="backdrop-blur-md bg-purple-50/80 border border-purple-200 shadow-xl">
+          <Card className="backdrop-blur-sm bg-purple-50/80 border border-purple-200/50 shadow-xl">
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-2">

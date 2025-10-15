@@ -6,6 +6,7 @@ import { Home, TrendingUp, BarChart3, User, LogOut, ArrowLeftRight } from 'lucid
 import { Button } from '@/components/ui/button';
 import { useWallet } from '@/hooks/useWallet';
 import { WalletModal } from '@/components/WalletModal';
+import { ThemeToggle } from '@/components/ThemeToggle';
 
 export const Navigation = () => {
   const location = useLocation();
@@ -62,6 +63,7 @@ export const Navigation = () => {
             </div>
 
             <div className="flex items-center space-x-4">
+              <ThemeToggle />
               {isConnected ? (
                 <>
                   <div className="flex items-center space-x-2 px-4 py-2 bg-blue-50 border border-blue-200 rounded-xl">
@@ -119,6 +121,10 @@ export const Navigation = () => {
                 <span className="text-xs font-medium">{item.label}</span>
               </Link>
             ))}
+            <div className="flex flex-col items-center space-y-1 p-3 rounded-2xl min-w-[60px]">
+              <ThemeToggle />
+              <span className="text-xs font-medium text-gray-600">Theme</span>
+            </div>
           </div>
         </nav>
       </div>

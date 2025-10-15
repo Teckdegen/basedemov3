@@ -50,7 +50,7 @@ const About = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-32 pb-20 md:pb-6">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 pt-32 pb-20 md:pb-6">
       <div className="max-w-4xl mx-auto px-4 space-y-8">
         {/* Header */}
         <motion.div

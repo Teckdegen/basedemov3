@@ -23,7 +23,7 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 pt-24 pb-20 md:pb-6">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 pt-24 pb-20 md:pb-6">
       {/* Ticker */}
       <Ticker />
 
@@ -34,7 +34,7 @@ const Index = () => {
           animate={{ opacity: 1, y: 0 }}
           className="text-center space-y-6"
         >
-          <div className="inline-flex items-center space-x-3 px-6 py-3 bg-white rounded-2xl shadow-lg border border-gray-200">
+          <div className="inline-flex items-center space-x-3 px-6 py-3 bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-gray-200/50">
             <TrendingUp className="w-6 h-6 text-blue-600" />
             <h1 className="text-3xl md:text-4xl font-bold text-gray-800">Base Demo</h1>
           </div>
@@ -101,7 +101,7 @@ const Index = () => {
           transition={{ delay: 0.3 }}
           className="grid md:grid-cols-3 gap-6"
         >
-          <Card className="bg-white/80 border border-gray-200 shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl">
+          <Card className="bg-white/80 backdrop-blur-sm border border-gray-200/50 shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl">
             <CardContent className="p-6 text-center">
               <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <TrendingUp className="w-8 h-8 text-blue-600" />
@@ -111,7 +111,7 @@ const Index = () => {
             </CardContent>
           </Card>
 
-          <Card className="bg-white/80 border border-gray-200 shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl">
+          <Card className="bg-white/80 backdrop-blur-sm border border-gray-200/50 shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl">
             <CardContent className="p-6 text-center">
               <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Brain className="w-8 h-8 text-purple-600" />
@@ -121,7 +121,7 @@ const Index = () => {
             </CardContent>
           </Card>
 
-          <Card className="bg-white/80 border border-gray-200 shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl">
+          <Card className="bg-white/80 backdrop-blur-sm border border-gray-200/50 shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl">
             <CardContent className="p-6 text-center">
               <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Lock className="w-8 h-8 text-green-600" />
@@ -140,28 +140,28 @@ const Index = () => {
             transition={{ delay: 0.4 }}
             className="grid grid-cols-2 md:grid-cols-4 gap-4"
           >
-            <Card className="bg-white/80 border border-gray-200 shadow-lg rounded-2xl">
+            <Card className="bg-white/80 backdrop-blur-sm border border-gray-200/50 shadow-lg rounded-2xl">
               <CardContent className="p-4 text-center">
                 <p className="text-sm text-gray-600">Portfolio</p>
                 <p className="text-xl font-bold text-gray-800">{profile.portfolio.length}</p>
                 <p className="text-xs text-gray-500">Tokens</p>
               </CardContent>
             </Card>
-            <Card className="bg-white/80 border border-gray-200 shadow-lg rounded-2xl">
+            <Card className="bg-white/80 backdrop-blur-sm border border-gray-200/50 shadow-lg rounded-2xl">
               <CardContent className="p-4 text-center">
                 <p className="text-sm text-gray-600">Trades</p>
                 <p className="text-xl font-bold text-gray-800">{profile.tradeHistory.length}</p>
                 <p className="text-xs text-gray-500">Total</p>
               </CardContent>
             </Card>
-            <Card className="bg-white/80 border border-gray-200 shadow-lg rounded-2xl">
+            <Card className="bg-white/80 backdrop-blur-sm border border-gray-200/50 shadow-lg rounded-2xl">
               <CardContent className="p-4 text-center">
                 <p className="text-sm text-gray-600">Watchlist</p>
                 <p className="text-xl font-bold text-gray-800">{profile.watchlist.length}</p>
                 <p className="text-xs text-gray-500">Items</p>
               </CardContent>
             </Card>
-            <Card className="bg-white/80 border border-gray-200 shadow-lg rounded-2xl">
+            <Card className="bg-white/80 backdrop-blur-sm border border-gray-200/50 shadow-lg rounded-2xl">
               <CardContent className="p-4 text-center">
                 <p className="text-sm text-gray-600">Total Value</p>
                 <p className="text-xl font-bold text-blue-600">
